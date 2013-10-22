@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CssOptimizer.Tests", "CssOptimizer.Tests\CssOptimizer.Tests.csproj", "{B1A84EB3-7167-4E90-883A-364E1381FA4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CssOptimizer.App", "CssOptimizer.App\CssOptimizer.App.csproj", "{9B8B1D69-ADF6-441E-83E4-21E8D13D5881}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CssOptimizer.Domain", "CssOptimizer.Domain\CssOptimizer.Domain.csproj", "{682DCD74-1E8E-4DD4-A39B-1C76A58ECBCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B1A84EB3-7167-4E90-883A-364E1381FA4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1A84EB3-7167-4E90-883A-364E1381FA4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1A84EB3-7167-4E90-883A-364E1381FA4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A84EB3-7167-4E90-883A-364E1381FA4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B8B1D69-ADF6-441E-83E4-21E8D13D5881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B8B1D69-ADF6-441E-83E4-21E8D13D5881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B8B1D69-ADF6-441E-83E4-21E8D13D5881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B8B1D69-ADF6-441E-83E4-21E8D13D5881}.Release|Any CPU.Build.0 = Release|Any CPU
+		{682DCD74-1E8E-4DD4-A39B-1C76A58ECBCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{682DCD74-1E8E-4DD4-A39B-1C76A58ECBCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{682DCD74-1E8E-4DD4-A39B-1C76A58ECBCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{682DCD74-1E8E-4DD4-A39B-1C76A58ECBCA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
