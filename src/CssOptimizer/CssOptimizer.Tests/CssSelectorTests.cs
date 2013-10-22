@@ -13,7 +13,9 @@ namespace CssOptimizer.Tests
 	[TestFixture]
 	public class CssSelectorTests
 	{
-		[TestCaseSource("SelectorsDataSource")]
+		[TestCaseSource("SelectorsDataSource", Category = "Common")]
+		[TestCaseSource("AttributesDataSource", Category = "Attributes")]
+		[TestCaseSource("ClassDataSource", Category = "Class selectors")]
 		public void ConstructorTests(string selector, object expected)
 		{
 
@@ -34,18 +36,130 @@ namespace CssOptimizer.Tests
 			get
 			{
 				yield return new TestCaseData("li", new CssSelector { Tag = "li" });
-				yield return new TestCaseData("*", new CssSelector { UniversalSelector = "*"});
-				yield return new TestCaseData("#foo", new CssSelector { Identifier = "foo" });
-				yield return new TestCaseData("p[title]", new CssSelector { Tag  = "p", Attributes = {"title"}});
-				yield return new TestCaseData("p[title=\"a\"]", new CssSelector { Tag  = "p", Attributes = {"title=\"a\""}});
-				yield return new TestCaseData("p[title=\"a\"]", new CssSelector { Tag  = "p", Attributes = {"title=\"a\""}});
+				yield return new TestCaseData("*", new CssSelector { UniversalSelector = "*" });
+				yield return new TestCaseData("#foo", new CssSelector { Id = "foo" });
+				yield return new TestCaseData("li#t2", new CssSelector { Tag = "li", Id = "t2" });
+				
 
+			}
+		}
+
+		public static IEnumerable ClassDataSource
+		{
+			get
+			{
+				yield return new TestCaseData(".t1", new CssSelector { Classes = {"t1"}});
+				yield return new TestCaseData("li.t2", new CssSelector { Tag = "li", Classes = {"t2"}});
+				yield return new TestCaseData("div.te.st", new CssSelector { Tag = "div", Classes = {"te", "st"}});
+				yield return new TestCaseData(".te.st", new CssSelector { Classes = {"te", "st"}});
+				yield return new TestCaseData(".t1:not(.t2)", new CssSelector { Classes = { "t1" }, PseudoClasses = { "not(.t2)" } });
+				yield return new TestCaseData(":not(.t2)", new CssSelector { PseudoClasses = { "not(.t2)" }});
+				yield return new TestCaseData("input:enabled", new CssSelector { PseudoClasses = { "enabled" }});
+
+
+			}
+		}
+
+		public static IEnumerable AttributesDataSource
+		{
+			get
+			{
+				yield return new TestCaseData("p[title]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							MathingRule = CssAttributeMathcingRule.Exists
+						}
+					}
+				});
+				yield return new TestCaseData("p[title=\"a\"]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							Value = "a",
+							MathingRule = CssAttributeMathcingRule.Equals
+						}
+					}
+				});
+				yield return new TestCaseData("p[title~=\"a\"]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							Value = "a",
+							MathingRule = CssAttributeMathcingRule.ContainsWord
+						}
+					}
+				});
+				yield return new TestCaseData("p[title|=\"a\"]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							Value = "a",
+							MathingRule = CssAttributeMathcingRule.ContainsPrefix
+						}
+					}
+				});
+				yield return new TestCaseData("p[title^=\"a\"]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							Value = "a",
+							MathingRule = CssAttributeMathcingRule.BeginsWith
+						}
+					}
+				});
+				yield return new TestCaseData("p[title$=\"a\"]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							Value = "a",
+							MathingRule = CssAttributeMathcingRule.EndsWith
+						}
+					}
+				});
+				yield return new TestCaseData("p[title*=\"a\"]", new CssSelector
+				{
+					Tag = "p",
+					Attributes =
+					{
+						new CssAttribute
+						{
+							Key = "title",
+							Value = "a",
+							MathingRule = CssAttributeMathcingRule.Contains
+						}
+					}
+				});
 			}
 		}
 	}
 
 
-	
+
 
 
 	public static class AssertEx
