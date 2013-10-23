@@ -24,7 +24,11 @@ namespace CssOptimizer.Tests
 			var cssSelector = new CssSelector(selector);
 
 			//Assert
+			JsConfig<CssSelector>.ExcludePropertyNames = new[] { "OriginalSelector" };
+			
 			Assert.AreEqual(cssSelector.ToJson(), expected.ToJson());
+
+			JsConfig<CssSelector>.ExcludePropertyNames = new string[]{};
 		}
 
 
@@ -40,7 +44,7 @@ namespace CssOptimizer.Tests
 				yield return new TestCaseData("*", new CssSelector { UniversalSelector = "*" });
 				yield return new TestCaseData("#foo", new CssSelector { Id = "foo" });
 				yield return new TestCaseData("li#t2", new CssSelector { Tag = "li", Id = "t2" });
-				
+
 
 			}
 		}
@@ -49,13 +53,13 @@ namespace CssOptimizer.Tests
 		{
 			get
 			{
-				yield return new TestCaseData(".t1", new CssSelector { Classes = {"t1"}});
-				yield return new TestCaseData("li.t2", new CssSelector { Tag = "li", Classes = {"t2"}});
-				yield return new TestCaseData("div.te.st", new CssSelector { Tag = "div", Classes = {"te", "st"}});
-				yield return new TestCaseData(".te.st", new CssSelector { Classes = {"te", "st"}});
+				yield return new TestCaseData(".t1", new CssSelector { Classes = { "t1" } });
+				yield return new TestCaseData("li.t2", new CssSelector { Tag = "li", Classes = { "t2" } });
+				yield return new TestCaseData("div.te.st", new CssSelector { Tag = "div", Classes = { "te", "st" } });
+				yield return new TestCaseData(".te.st", new CssSelector { Classes = { "te", "st" } });
 				yield return new TestCaseData(".t1:not(.t2)", new CssSelector { Classes = { "t1" }, PseudoClasses = { "not(.t2)" } });
-				yield return new TestCaseData(":not(.t2)", new CssSelector { PseudoClasses = { "not(.t2)" }});
-				yield return new TestCaseData("input:enabled", new CssSelector { PseudoClasses = { "enabled" }});
+				yield return new TestCaseData(":not(.t2)", new CssSelector { PseudoClasses = { "not(.t2)" } });
+				yield return new TestCaseData("input:enabled", new CssSelector { PseudoClasses = { "enabled" } });
 
 
 			}
@@ -163,5 +167,5 @@ namespace CssOptimizer.Tests
 
 
 
-	
+
 }

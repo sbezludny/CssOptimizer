@@ -6,7 +6,7 @@ namespace CssOptimizer.Domain
 {
 	public class CssSelector
 	{
-		
+		public string OriginalSelector { get; set; }
 
 		/// <summary>
 		/// Селектор тега
@@ -64,7 +64,7 @@ namespace CssOptimizer.Domain
 
 		public CssSelector(string selector):this()
 		{
-			//^(?<type>[\*|\w|\-]+)?(?<id>#[\w|\-]+)?(?<classes>\.[\w|\-|\.]+)*(?<attributes>\[.+\])*(?<pseudo>:[\*|\w]+)*$
+			OriginalSelector = selector;
 			const string pattern =
 				@"^(?<Type>[\*|\w|\-]+)?(?<Id>#[\w|\-]+)?(?<Classes>\.[\w|\-|\.]+)*(?<Attributes>\[.+\])*(?<PseudoClasses>:[\*|\w]+)*$";
 

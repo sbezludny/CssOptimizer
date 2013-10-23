@@ -16,7 +16,7 @@ namespace CssOptimizer.App
 
 			var analyzer = new WebPageAnalyzer();
 
-			var results = analyzer.GetUnusedCssRules(url);
+			var results = analyzer.GetUnusedCssSelectors(url);
 
 			DisplayResults(results);
 

@@ -7,16 +7,24 @@ using HtmlAgilityPack;
 
 namespace CssOptimizer.Domain
 {
-	public class HtmlParser
+	public static class HtmlDocumentExtensions
 	{
-		public IEnumerable<Uri> GetExternalStylesheets(HtmlDocument html)
+		
+
+		public static IEnumerable<string> GetExternalCssSources(this HtmlDocument html)
 		{
-			throw new NotImplementedException();
+			return html.DocumentNode
+				.SelectNodes("//link[@href]")
+				.Select(link => link.Attributes["href"].Value)
+				.Distinct()
+				.ToList();
 		}
 
-		public string GetInlineCss(HtmlDocument html)
+		public static string GetInlineCss(this HtmlDocument html)
 		{
-			throw new NotImplementedException();
+			return html.DocumentNode
+				.SelectNodes("//style")
+				.Aggregate(String.Empty, (inline, node) => inline + node.InnerText.Trim());
 		}
 	}
 }

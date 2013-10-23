@@ -1,24 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CssOptimizer.Domain
 {
 	public class CssStylesheet
 	{
-		private readonly List<string> _rules = new List<string>();
+		private readonly List<CssSelector> _selectors = new List<CssSelector>();
 
-		public IEnumerable<string> Rules { get { return _rules; } }
+		public IEnumerable<CssSelector> Selectors { get { return _selectors; } }
 
 		public CssStylesheet(string rawCss)
 		{
 			var css = CleanUp(rawCss);
 
 			Process(css);
-
 		}
 
 		private void Process(string css)
@@ -36,11 +33,14 @@ namespace CssOptimizer.Domain
 		private void FillStyleClass(string s)
 		{
 			var parts = s.Split('{');
-			var styleName = CleanUp(parts[0]).Trim().ToLower();
+			var selectors = CleanUp(parts[0]).Trim().ToLower().Split(new []{','}, StringSplitOptions.RemoveEmptyEntries).Select(z => z.Trim()).ToList();
 
-			if (!_rules.Contains(styleName))
+			foreach (var selector in selectors)
 			{
-				_rules.Add(styleName);
+				if (_selectors.All(z => z.OriginalSelector != selector))
+				{
+					_selectors.Add(new CssSelector(selector));
+				}
 			}
 		}
 
