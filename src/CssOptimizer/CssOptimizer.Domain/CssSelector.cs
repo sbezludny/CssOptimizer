@@ -1,61 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CssOptimizer.Domain
 {
-	public class CssStylesheet
-	{
-		private readonly List<string> _rules = new List<string>();
-
-		public IEnumerable<string> Rules { get { return _rules; } }
-
-		public CssStylesheet(string rawCss)
-		{
-			var css = CleanUp(rawCss);
-
-			Process(css);
-
-		}
-
-		private void Process(string css)
-		{
-			var parts = css.Split('}');
-			foreach (var s in parts)
-			{
-				if (CleanUp(s).IndexOf('{') > -1)
-				{
-					FillStyleClass(s);
-				}
-			}
-		}
-
-		private void FillStyleClass(string s)
-		{
-			var parts = s.Split('{');
-			var styleName = CleanUp(parts[0]).Trim().ToLower();
-
-			if (!_rules.Contains(styleName))
-			{
-				_rules.Add(styleName);
-			}
-		}
-
-		private string CleanUp(string s)
-		{
-			var copy = s;
-			var regex = new Regex("(/\\*(.|[\r\n])*?\\*/)|(//.*)");
-			copy = regex.Replace(copy, "");
-			copy = copy.Replace("\r", "").Replace("\n", "");
-			return copy;
-		}
-	}
-
-
 	public class CssSelector
 	{
 		
@@ -118,7 +66,7 @@ namespace CssOptimizer.Domain
 		{
 			//^(?<type>[\*|\w|\-]+)?(?<id>#[\w|\-]+)?(?<classes>\.[\w|\-|\.]+)*(?<attributes>\[.+\])*(?<pseudo>:[\*|\w]+)*$
 			const string pattern =
-				@"^(?<type>[\*|\w|\-]+)?(?<id>#[\w|\-]+)?(?<classes>\.[\w|\-|\.]+)*(?<attributes>\[.+\])*(?<pseudo>:[\*|\w]+)*$";
+				@"^(?<Type>[\*|\w|\-]+)?(?<Id>#[\w|\-]+)?(?<Classes>\.[\w|\-|\.]+)*(?<Attributes>\[.+\])*(?<PseudoClasses>:[\*|\w]+)*$";
 
 			var regex = new Regex(pattern);
 
@@ -126,10 +74,49 @@ namespace CssOptimizer.Domain
 
 			foreach (Match match in matches)
 			{
-				ProcessType(match.Groups["type"].Value);
 
-				ProcessId(match.Groups["id"].Value);
+				//todo:refactor
+				
+
+				ProcessType(match.Groups["Type"].Value);
+
+				ProcessId(match.Groups["Id"].Value);
+
+				ProcessClasses(match.Groups["Classes"].Value);
+
+				ProcessAttributes(match.Groups["Attributes"].Value);
 			}
+
+		}
+
+		private void ProcessClasses(string selector)
+		{
+			if (String.IsNullOrWhiteSpace(selector))
+				return;
+
+			var regex = new Regex(@".(?<class>\w+)");
+			var matchResult = regex.Match(selector);
+			while (matchResult.Success)
+			{
+				Classes.Add(matchResult.Groups["class"].Value);
+				matchResult = matchResult.NextMatch();
+			} 
+
+		}
+
+		private void ProcessAttributes(string selector)
+		{
+			if (String.IsNullOrWhiteSpace(selector))
+				return;
+
+			var regex = new Regex(CssAttribute.MatchingPattern);
+			var matchResult = regex.Match(selector);
+			while (matchResult.Success)
+			{
+				Attributes.Add(new CssAttribute(matchResult.Value));
+				matchResult = matchResult.NextMatch();
+			} 
+
 
 		}
 
@@ -155,45 +142,5 @@ namespace CssOptimizer.Domain
 				Tag = type;
 			}
 		}
-	}
-
-	public class CssAttribute
-	{
-		public string Key { get; set; }
-		public string Value { get; set; }
-
-		public CssAttributeMathcingRule MathingRule { get; set; }
-	}
-
-	public enum CssAttributeMathcingRule
-	{
-		/// <summary>
-		/// [title]
-		/// </summary>
-		Exists = 0,
-		/// <summary>
-		/// [title=a]
-		/// </summary>
-		Equals = 1,
-		/// <summary>
-		/// [title~=a]
-		/// </summary>
-		ContainsWord = 2,
-		/// <summary>
-		/// [title|=a]
-		/// </summary>
-		ContainsPrefix = 3,
-		/// <summary>
-		/// [title^=a]
-		/// </summary>
-		BeginsWith = 4,
-		/// <summary>
-		/// [title$=a]
-		/// </summary>
-		EndsWith = 5,
-		/// <summary>
-		/// [title*=a]
-		/// </summary>
-		Contains = 6
 	}
 }

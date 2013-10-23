@@ -42,7 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CssParser.cs" />
+    <Compile Include="CssAttribute.cs" />
+    <Compile Include="CssAttributeOperator.cs" />
+    <Compile Include="CssStylesheet.cs" />
+    <Compile Include="CssSelector.cs" />
     <Compile Include="HtmlParser.cs" />
     <Compile Include="WebPageAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
