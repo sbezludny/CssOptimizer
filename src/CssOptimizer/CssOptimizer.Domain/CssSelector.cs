@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace CssOptimizer.Domain
@@ -141,6 +142,33 @@ namespace CssOptimizer.Domain
 			{
 				Tag = type;
 			}
+		}
+
+		public override string ToString()
+		{
+			return OriginalSelector;
+		}
+
+		public string ToXPath()
+		{
+			var xpath = "//";
+
+			if (UniversalSelector != null)
+				xpath += "*";
+
+			if (Tag != null)
+				xpath += Tag;
+
+			if (Attributes.Any())
+			{
+				xpath += String.Format("[{0}]", String.Join(" and ", Attributes.Select(a => a.ToXPath())));
+			}
+
+			//todo:remove
+			if (xpath == "//")
+				xpath += "*";
+
+			return xpath;
 		}
 	}
 }

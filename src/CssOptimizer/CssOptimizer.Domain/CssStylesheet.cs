@@ -7,12 +7,22 @@ namespace CssOptimizer.Domain
 {
 	public class CssStylesheet
 	{
+		
 		private readonly List<CssSelector> _selectors = new List<CssSelector>();
+		private readonly List<string> _importLinks = new List<string>();
 
+		public Uri Url { get; set; }
 		public IEnumerable<CssSelector> Selectors { get { return _selectors; } }
 
-		public CssStylesheet(string rawCss)
+		public IEnumerable<string> ImportLinks
+
 		{
+			get { return _importLinks; }
+		}
+
+		public CssStylesheet(Uri url, string rawCss)
+		{
+			Url = url;
 			var css = CleanUp(rawCss);
 
 			Process(css);

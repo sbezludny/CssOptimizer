@@ -9,12 +9,14 @@ namespace CssOptimizer.App
 {
 	class Program
 	{
+		private static readonly CssStylesheets CssStylesheets = new CssStylesheets();
+
 		static void Main(string[] args)
 		{
 
 			var url = new Uri("http://uawebchallenge.com/");
 
-			var analyzer = new WebPageAnalyzer();
+			var analyzer = new WebPageAnalyzer(CssStylesheets);
 
 			var results = analyzer.GetUnusedCssSelectors(url);
 
@@ -23,7 +25,7 @@ namespace CssOptimizer.App
 			Console.ReadKey();
 		}
 
-		private static void DisplayResults(Dictionary<Uri, IEnumerable<string>> results)
+		private static void DisplayResults(Dictionary<Uri, IEnumerable<CssSelector>> results)
 		{
 			foreach (var pageRuleSet in results)
 			{

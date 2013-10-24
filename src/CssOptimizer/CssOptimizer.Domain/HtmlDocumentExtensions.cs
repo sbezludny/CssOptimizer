@@ -9,12 +9,15 @@ namespace CssOptimizer.Domain
 {
 	public static class HtmlDocumentExtensions
 	{
-		
+		private static HtmlNodeCollection SelectNodeCollection(this HtmlNode node, string xPath)
+		{
+			return node.SelectNodes(xPath) ?? new HtmlNodeCollection(null);
+		}
 
-		public static IEnumerable<string> GetExternalCssSources(this HtmlDocument html)
+		public static IEnumerable<string> GetExternalCssLinks(this HtmlDocument html)
 		{
 			return html.DocumentNode
-				.SelectNodes("//link[@href]")
+				.SelectNodeCollection("//link[@href]")
 				.Select(link => link.Attributes["href"].Value)
 				.Distinct()
 				.ToList();
@@ -23,8 +26,13 @@ namespace CssOptimizer.Domain
 		public static string GetInlineCss(this HtmlDocument html)
 		{
 			return html.DocumentNode
-				.SelectNodes("//style")
+				.SelectNodeCollection("//style")
 				.Aggregate(String.Empty, (inline, node) => inline + node.InnerText.Trim());
+		}
+
+		public static bool HasElementsWithSelector(this HtmlDocument html, CssSelector selector)
+		{
+			return html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
 		}
 	}
 }

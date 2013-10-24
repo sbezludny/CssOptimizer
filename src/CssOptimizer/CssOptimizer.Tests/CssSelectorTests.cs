@@ -129,7 +129,7 @@ namespace CssOptimizer.Tests
 						{
 							Name = "title",
 							Value = "a",
-							Operator = CssAttributeOperator.BeginsWith
+							Operator = CssAttributeOperator.StartsWith
 						}
 					}
 				});

@@ -21,7 +21,7 @@ namespace CssOptimizer.Tests
 			var htmlDocument = GetHtmlDocument(headHtmlSnippet);
 
 			//Act
-			var uriSet = htmlDocument.GetExternalCssSources();
+			var uriSet = htmlDocument.GetExternalCssLinks();
 
 			//Assert
 			Assert.AreEqual(sources.ToJson(), uriSet.ToJson());

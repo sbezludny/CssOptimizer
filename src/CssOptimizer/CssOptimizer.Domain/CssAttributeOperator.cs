@@ -23,7 +23,7 @@ namespace CssOptimizer.Domain
 		/// <summary>
 		/// [title^=a]
 		/// </summary>
-		BeginsWith = 4,
+		StartsWith = 4,
 		/// <summary>
 		/// [title$=a]
 		/// </summary>
@@ -55,7 +55,7 @@ namespace CssOptimizer.Domain
 					attributeOperator = CssAttributeOperator.ContainsPrefix;
 					break;
 				case "^=":
-					attributeOperator = CssAttributeOperator.BeginsWith;
+					attributeOperator = CssAttributeOperator.StartsWith;
 					break;
 				case "$=":
 					attributeOperator = CssAttributeOperator.EndsWith;

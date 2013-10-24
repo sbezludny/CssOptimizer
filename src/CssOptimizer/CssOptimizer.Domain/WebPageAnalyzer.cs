@@ -5,27 +5,70 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 
 namespace CssOptimizer.Domain
 {
 	public class WebPageAnalyzer
 	{
+		private readonly ICssStylesheets _stylesheets;
 
-
-		public Dictionary<Uri, IEnumerable<string>> GetUnusedCssSelectors(Uri uri)
+		public WebPageAnalyzer(ICssStylesheets stylesheets)
 		{
-			throw new NotImplementedException();
+			_stylesheets = stylesheets;
 		}
 
-		private string Download(Uri uri)
+		public Dictionary<Uri, IEnumerable<CssSelector>> GetUnusedCssSelectors(Uri uri)
 		{
-			var tmpPath = Path.GetTempFileName();
+			var result = new Dictionary<Uri, IEnumerable<CssSelector>>();
+
+			var htmlDocument = new HtmlDocument();
 
 			using (var webClient = new WebClient())
 			{
-				webClient.DownloadFile(uri, tmpPath);
+				htmlDocument.LoadHtml(webClient.DownloadString(uri));
 			}
-			return tmpPath;
+
+			var cssUris = htmlDocument.GetExternalCssLinks().Select(href => ConvertToUri(uri, href));
+
+			var styleSheets = cssUris.Select(cssUri => _stylesheets.GetOrDownload(cssUri)).ToList();
+
+			var inlineCss = htmlDocument.GetInlineCss();
+
+			if (!String.IsNullOrWhiteSpace(inlineCss))
+			{
+				styleSheets.Add(new CssStylesheet(uri, inlineCss));
+			}
+
+			foreach (var stylesheet in styleSheets)
+			{
+				var unusedSelectors = GetUnusedSelectors(htmlDocument, stylesheet);
+
+				if (unusedSelectors.Any())
+				{
+					result.Add(stylesheet.Url, unusedSelectors);
+				}
+			}
+
+			return result;
+
+
 		}
+
+		private IEnumerable<CssSelector> GetUnusedSelectors(HtmlDocument document, CssStylesheet stylesheet)
+		{
+			return stylesheet.Selectors
+				.Where(selector => !document.HasElementsWithSelector(selector))
+				.ToList();
+		} 
+
+		private Uri ConvertToUri(Uri baseUrl, string href)
+		{
+			if(Uri.IsWellFormedUriString(href, UriKind.Absolute))
+				return new Uri(href);
+
+			return new Uri(baseUrl, href);
+		}
+
 	}
 }

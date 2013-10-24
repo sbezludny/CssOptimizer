@@ -17,6 +17,40 @@ namespace CssOptimizer.Domain
 			
 		}
 
+		public string ToXPath()
+		{
+			string selector;
+
+			switch (Operator)
+			{
+				case CssAttributeOperator.Exists:
+					selector = "@{0}";
+					break;
+				case CssAttributeOperator.Equals:
+					selector = "@{0}='{1}'";
+					break;
+				case CssAttributeOperator.ContainsWord:
+					selector = "contains(concat(' ', normalize-space(@{0}), ' '), ' {1} ')";
+					break;
+				case CssAttributeOperator.ContainsPrefix:
+					selector = "@name = '{1}' or starts-with(@{0}, '{1}-')";
+					break;
+				case CssAttributeOperator.StartsWith:
+					selector = "starts-with(@{0}, '{1}')";
+					break;
+				case CssAttributeOperator.EndsWith:
+					selector = "substring(@{0}, string-length(@{0})-4) = '{1}'";
+					break;
+				case CssAttributeOperator.Contains:
+					selector = "contains(@{0}, '{1}')";
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			return String.Format(selector, Name, Value);
+		}
+
 		public CssAttribute(string selector)
 		{
 			//todo:refactor

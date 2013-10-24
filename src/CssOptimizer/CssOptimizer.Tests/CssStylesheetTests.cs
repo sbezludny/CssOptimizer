@@ -14,16 +14,28 @@ namespace CssOptimizer.Tests
 	public class CssStylesheetTests
 	{
 		[TestCaseSource("CssDataSource")]
-		public void ConstructorTests(string css, IEnumerable<string> expectedSelectors)
+		public void SelectorsExtraction(string css, IEnumerable<string> expectedSelectors)
 		{
 			//Arrange
 
 			//Act
-			var stylesheet = new CssStylesheet(css);
+			var stylesheet = new CssStylesheet(null, css );
 
 			//Assert
 			Assert.AreEqual(expectedSelectors.ToJson(), stylesheet.Selectors.Select(z => z.OriginalSelector).ToJson());
 
+		}
+
+		[TestCaseSource("ImportsDataSource")]
+		public void ImportUrlsExtractions(string css, IEnumerable<string> importUrls)
+		{
+			//Arrange
+
+			//Act
+			var styleSheet = new CssStylesheet(null, css);
+
+			//Assert
+			CollectionAssert.AreEquivalent(styleSheet.ImportLinks, importUrls);
 		}
 
 		public static IEnumerable CssDataSource
@@ -37,5 +49,28 @@ namespace CssOptimizer.Tests
 
 			}
 		}
+
+		public static IEnumerable ImportsDataSource
+		{
+			get
+			{
+				yield return new TestCaseData("li { }", new string[] { });	
+				yield return new TestCaseData(@"@import url(""fineprint.css"") print;
+												@import url(""bluish.css"") projection, tv;
+												@import 'custom.css';
+												@import url(""chrome://communicator/skin/"");
+												@import ""common.css"" screen, projection;
+												@import url('landscape.css') screen and (orientation:landscape);", 
+												new []
+												{
+													"fineprint.css",
+													"bluish.css",
+													"custom.css",
+													"chrome://communicator/skin/",
+													"common.css",
+													"landscape.css",
+												});	
+			}
+		} 
 	}
 }
