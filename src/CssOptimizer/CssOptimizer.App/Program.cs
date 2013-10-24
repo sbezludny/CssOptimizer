@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using CssOptimizer.Domain;
-using HtmlAgilityPack;
 
 namespace CssOptimizer.App
 {
@@ -14,7 +13,7 @@ namespace CssOptimizer.App
 		static void Main(string[] args)
 		{
 
-			var url = new Uri("http://uawebchallenge.com/");
+			var url = new Uri(args[0]);
 
 			var analyzer = new WebPageAnalyzer(CssStylesheets);
 
@@ -24,6 +23,8 @@ namespace CssOptimizer.App
 
 			Console.ReadKey();
 		}
+
+		
 
 		private static void DisplayResults(Dictionary<Uri, IEnumerable<CssSelector>> results)
 		{
