@@ -20,14 +20,7 @@ namespace CssOptimizer.Domain
 		{
 			var result = new Dictionary<Uri, IEnumerable<CssSelector>>();
 
-			var htmlDocument = new HtmlDocument();
-
-			using (var webClient = new WebClient())
-			{
-				htmlDocument.LoadHtml(webClient.DownloadString(uri));
-			}
-
-			
+			var htmlDocument = GetHtml(uri);
 
 			var styleSheets = new List<CssStylesheet>();
 
@@ -38,9 +31,11 @@ namespace CssOptimizer.Domain
 				styleSheets.Add(new CssStylesheet(uri, inlineCss));
 			}
 
-			var cssUris = htmlDocument.GetExternalCssLinks().Select(href => ConvertToUri(uri, href)).ToList();
+			var cssUrls = htmlDocument.GetExternalCssLinks().Select(href => ConvertToUri(uri, href)).ToList();
 
-			styleSheets.AddRange(await GetCssStylesheets(cssUris));
+			
+
+			styleSheets.AddRange(await GetCssStylesheets(cssUrls));
 
 			foreach (var stylesheet in styleSheets)
 			{
@@ -55,6 +50,19 @@ namespace CssOptimizer.Domain
 			return result;
 
 
+		}
+
+		
+
+		private static HtmlDocument GetHtml(Uri uri)
+		{
+			var htmlDocument = new HtmlDocument();
+
+			using (var webClient = new WebClient())
+			{
+				htmlDocument.LoadHtml(webClient.DownloadString(uri));
+			}
+			return htmlDocument;
 		}
 
 		private Task<CssStylesheet[]> GetCssStylesheets(IList<Uri> urls)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CssOptimizer.Domain.Utils;
 
 namespace CssOptimizer.Domain
@@ -7,57 +8,52 @@ namespace CssOptimizer.Domain
 	public class CssSelector
 	{
 		public string RawSelector { get; set; }
-		
-		public static readonly string[] UnsupportedAtRules =
+
+		private static readonly string[] SupportedPseudoClasses =
 		{
-			"@charset",
-			"@document",
-			"@font-face",
-			"@import",
-			"@keyframes",
-			"@media",
-			"@namespace",
-			"@page",
-			"@supports"
+			":first-child", 
+			":last-child", 
+			":only-child", 
+			":nth-child", 
+			":empty", 
+			":not", 
+			":contains", 
+			":disabled", 
+			":checked"
 		};
 
-		public static readonly string[] UnsupportedPseudoSelectors =
-		{
-			":indeterminate", 
-			":first-line", 
-			":first-letter",
-            ":selection", 
-			":before", 
-			":after", 
-			":link", 
-			":visited",
-			":active", 
-			":focus", 
-			":hover",
-			":enabled"
-		};
-		
+		private readonly string _supportedPseudoClassesPattern = String.Join("|", SupportedPseudoClasses);
+
 		public CssSelector(string selector)
 		{
 			Ensure.NotNullOrEmpty(selector, "selector");
 
+			EnsureSupportedPseudoClass(selector);
+
+			if (selector.StartsWith("@"))
+				throw new UnsupportedSelectorException("@-правила не поддерживаются.");
+
+			if (selector.Contains("%"))
+				throw new UnsupportedSelectorException("@keyframe не поддерживается.");
+
 			RawSelector = selector;
 		}
+
+		private void EnsureSupportedPseudoClass(string selector)
+		{
+			if (selector.Contains(":"))
+			{
+				var s = selector;
+				if (Regex.Replace(s, _supportedPseudoClassesPattern, "").Contains(":"))
+				{
+					var message = String.Format("Селектор `{0}` содержит не поддерживаемый псевдокласс.", selector);
+					throw new UnsupportedSelectorException(message);
+				}
+			}
+		}
+
 		public string ToXPath()
 		{
-			if (UnsupportedPseudoSelectors.Any(RawSelector.Contains))
-			{
-				var message = String.Format("Селектор `{0}` содержит не поддерживаемый селектор `{1}`.",
-									RawSelector,
-									UnsupportedPseudoSelectors.FirstOrDefault(RawSelector.Contains));
-				throw new UnsupportedSelectorException(message);
-			}
-
-			if (UnsupportedAtRules.Any(RawSelector.Contains))
-			{
-				throw new UnsupportedSelectorException("@-правила не поддерживаются.");
-			}
-
 			return CssSelectorParser.Transform(RawSelector);
 		}
 
@@ -66,14 +62,6 @@ namespace CssOptimizer.Domain
 			return RawSelector;
 		}
 
-		
-	}
 
-	public class UnsupportedSelectorException : Exception
-	{
-		public UnsupportedSelectorException(string message)
-			: base(message)
-		{
-		}
 	}
 }

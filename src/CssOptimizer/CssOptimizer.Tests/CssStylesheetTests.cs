@@ -35,7 +35,7 @@ namespace CssOptimizer.Tests
 			var styleSheet = new CssStylesheet(null, css);
 
 			//Assert
-			CollectionAssert.AreEquivalent(styleSheet.Imports, importUrls);
+			CollectionAssert.AreEquivalent(importUrls,styleSheet.Imports);
 		}
 
 		public static IEnumerable CssDataSource

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using CssOptimizer.Domain;
 
 namespace CssOptimizer.App
@@ -17,39 +16,87 @@ namespace CssOptimizer.App
 		static void Main(string[] args)
 		{
 
-			var url = new Uri(args[0]);
-
+#if DEBUG
 			var sw = new Stopwatch();
 			sw.Start();
-			var analyzer = new WebPageAnalyzer(CssStylesheets);
-
-			var results = analyzer.GetUnusedCssSelectors(url);
-
-			var formatResults = FormatResults(results.Result);
-			sw.Stop();
-
-			Debug.WriteLine(sw.ElapsedMilliseconds);
-			
-			Console.Write(formatResults);
-
-#if DEBUG
-			File.WriteAllText(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) , "results.txt"), formatResults);
 #endif
 
+			MainAsync(args).Wait();
+
+
+#if DEBUG
+			sw.Stop();
+
+			Console.WriteLine(sw.ElapsedMilliseconds);
+#endif
+			
+#if DEBUG
 			Console.ReadKey();
+#endif
+			
 		}
 
-		
+		private static async Task MainAsync(string[] args)
+		{
+			var options = new Options();
 
-		private static string FormatResults(Dictionary<Uri, IEnumerable<CssSelector>> results)
+			if (CommandLine.Parser.Default.ParseArguments(args, options))
+			{
+
+				if (!String.IsNullOrWhiteSpace(options.OutputFile))
+				{
+					File.Create(options.GetOutputFileName());
+				}
+
+				var tasks = options.Urls
+					.Select(ConvertToUrl)
+					.Select(uri => Task.Run(async () =>
+				{
+
+					var analyzer = new WebPageAnalyzer(CssStylesheets);
+
+					var results = await analyzer.GetUnusedCssSelectors(uri);
+
+					var formatResults = FormatResults(uri, results);
+
+
+
+					Console.Write(formatResults);
+
+					if (!String.IsNullOrWhiteSpace(options.OutputFile))
+					{
+						File.AppendAllText(options.GetOutputFileName(), formatResults);
+					}
+
+				})).ToList();
+
+				await Task.WhenAll(tasks);
+
+			}
+
+						
+		}
+
+		private static Uri ConvertToUrl(string uriString)
+		{
+			var url = uriString;
+			if (!Uri.IsWellFormedUriString(uriString, UriKind.Absolute))
+			{
+				url = "http://" + uriString;
+			}
+			return new Uri(url);
+		}
+
+
+		private static string FormatResults(Uri url, Dictionary<Uri, IEnumerable<CssSelector>> results)
 		{
 			var sb = new StringBuilder();
 
-			foreach (var pageRuleSet in results)
+			foreach (var ruleSet in results)
 			{
-				sb.AppendLine(pageRuleSet.Key.ToString());
+				sb.AppendFormat("{0} ---> {1}\r\n", url, ruleSet.Key);
 				sb.AppendLine("=====================");
-				foreach (var selector in pageRuleSet.Value)
+				foreach (var selector in ruleSet.Value)
 				{
 					sb.AppendLine(selector.ToString());
 				}

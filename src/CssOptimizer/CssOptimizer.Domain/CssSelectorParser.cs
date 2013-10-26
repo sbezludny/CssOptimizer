@@ -18,9 +18,9 @@ namespace CssOptimizer.Domain
 			Patterns.Add(new Regex(@"\s*(\+|~|>)\s*"), "$1");
 
 			//*, ~, +, and >
-			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*])~([a-zA-Z0-9_\-\*])"), "$1/following-sibling::$2");
-			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*])\+([a-zA-Z0-9_\-\*])"), "$1/following-sibling::*[1]/self::$2");
-			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*])>([a-zA-Z0-9_\-\*])"), "$1/$2");
+			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*.]+)~([a-zA-Z0-9_\-\*.]+)"), "$1/following-sibling::$2");
+			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*.]+)\+([a-zA-Z0-9_\-\*.]+)"), "$1/following-sibling::*[1]/self::$2");
+			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*.]+)>([a-zA-Z0-9_\-\*.]+)"), "$1/$2");
 
 			Patterns.Add(new Regex(@"\[([^=]+)=([^'|" + "\"" + @"][^\]]*)\]"), "[$1='$2']");
 

@@ -24,7 +24,24 @@ namespace CssOptimizer.Domain
 
 			Url = url;
 
+			ProcessImports(css);
 			Process(CleanUp(css));
+		}
+
+		private void ProcessImports(string css)
+		{
+			var regex = new Regex(@"@import\s+(url\(['\""]|['\""])([a-z][a-z0-9+\-.:/]*)(['\""]\)|['\""])");
+
+			var matchResults = regex.Match(css);
+			while (matchResults.Success)
+			{
+				var group = matchResults.Groups[2];
+				if (group.Success)
+				{
+					_imports.Add(group.Value);
+				}
+				matchResults = matchResults.NextMatch();
+			} 
 		}
 
 		private void Process(string css)
@@ -45,7 +62,18 @@ namespace CssOptimizer.Domain
 
 		private void FillSelectors(IEnumerable<string> selectors)
 		{
-			_selectors.AddRange(selectors.Distinct().Select(z => new CssSelector(z)));
+			selectors.Distinct().ToList().ForEach(s =>
+			{
+				try
+				{
+					var cssSelector = new CssSelector(s);
+					_selectors.Add(cssSelector);
+				}
+				catch (UnsupportedSelectorException ex)
+				{
+					
+				}
+			});
 		}
 
 		private IEnumerable<string> ExtractSelectors(string rule)
@@ -54,7 +82,7 @@ namespace CssOptimizer.Domain
 
 			var selectorsPart = rule.Split('{')[0];
 
-			selectors.AddRange(selectorsPart.Split(',').Select(s => s.Trim()).ToList());
+			selectors.AddRange(selectorsPart.Split(new[] { ',' , ';'}).Select(s => s.Trim()).ToList());
 
 			return selectors;
 		}

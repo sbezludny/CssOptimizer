@@ -7,7 +7,7 @@ CssOptimizer
 
 ### Использование 
 
-	> CssOptimizer.App.exe "http://uawebchallenge.com/"
+	> ./CssOptimizer.App.exe http://uawebchallenge.com/ http://google.com.ua
 	
 ### Возможноси
 
@@ -16,10 +16,10 @@ CssOptimizer
 	- Css внутри тега ```<style>```
 	- Css-файлы подключенные через правило ```@import```
 	
+- Анализ нескольких страниц
 
 ##### В разработке
 
-- Анализ нескольких страниц
 - Анализ всего сайта с возможностью задания к-ва страниц и глубины вложенности
 
 ### Поддерживаемые селекторы
