@@ -1,66 +1,79 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CssOptimizer.Domain.Utils;
 
 namespace CssOptimizer.Domain
 {
 	public class CssStylesheet
 	{
-		
+
 		private readonly List<CssSelector> _selectors = new List<CssSelector>();
-		private readonly List<string> _importLinks = new List<string>();
+		private readonly List<string> _imports = new List<string>();
 
 		public Uri Url { get; set; }
 		public IEnumerable<CssSelector> Selectors { get { return _selectors; } }
+		public IEnumerable<string> Imports { get { return _imports; } }
 
-		public IEnumerable<string> ImportLinks
-
+		public CssStylesheet(Uri url, string css)
 		{
-			get { return _importLinks; }
-		}
+			Ensure.NotNullOrEmpty(css, "css");
 
-		public CssStylesheet(Uri url, string rawCss)
-		{
 			Url = url;
-			var css = CleanUp(rawCss);
 
-			Process(css);
+			Process(CleanUp(css));
 		}
 
 		private void Process(string css)
 		{
-			var parts = css.Split('}');
-			foreach (var s in parts)
+			var selectors = new List<string>();
+
+			var rules = css.Split('}');
+			foreach (var rule in rules)
 			{
-				if (CleanUp(s).IndexOf('{') > -1)
+				if (rule.IndexOf('{') > -1)
 				{
-					FillStyleClass(s);
+					selectors.AddRange(ExtractSelectors(rule));
 				}
 			}
+
+			FillSelectors(selectors);
 		}
 
-		private void FillStyleClass(string s)
+		private void FillSelectors(IEnumerable<string> selectors)
 		{
-			var parts = s.Split('{');
-			var selectors = CleanUp(parts[0]).Trim().ToLower().Split(new []{','}, StringSplitOptions.RemoveEmptyEntries).Select(z => z.Trim()).ToList();
-
-			foreach (var selector in selectors)
-			{
-				if (_selectors.All(z => z.OriginalSelector != selector))
-				{
-					_selectors.Add(new CssSelector(selector));
-				}
-			}
+			_selectors.AddRange(selectors.Distinct().Select(z => new CssSelector(z)));
 		}
 
-		private string CleanUp(string s)
+		private IEnumerable<string> ExtractSelectors(string rule)
 		{
-			var copy = s;
-			var regex = new Regex("(/\\*(.|[\r\n])*?\\*/)|(//.*)");
-			copy = regex.Replace(copy, "");
-			copy = copy.Replace("\r", "").Replace("\n", "");
-			return copy;
+			var selectors = new List<string>();
+
+			var selectorsPart = rule.Split('{')[0];
+
+			selectors.AddRange(selectorsPart.Split(',').Select(s => s.Trim()).ToList());
+
+			return selectors;
+		}
+
+		
+
+		/// <summary>
+		/// Удаляет комментарии
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
+		private string CleanUp(string input)
+		{
+			var copy = input;
+			copy = new Regex("(/\\*(.|[\r\n])*?\\*/)|(//.*)")
+						.Replace(copy, "")
+						.Replace("\r", "")
+						.Replace("\n", "");
+			return copy.Trim().ToLower();
 		}
 	}
 }

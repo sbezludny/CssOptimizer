@@ -42,13 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CssAttribute.cs" />
-    <Compile Include="CssAttributeOperator.cs" />
+    <Compile Include="CssSelectorParser.cs" />
     <Compile Include="CssStylesheet.cs" />
     <Compile Include="CssSelector.cs" />
     <Compile Include="CssStylesheets.cs" />
     <Compile Include="HtmlDocumentExtensions.cs" />
-    <Compile Include="ICssStylesheets.cs" />
+    <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="WebPageAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

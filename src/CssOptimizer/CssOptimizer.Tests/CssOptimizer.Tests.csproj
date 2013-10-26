@@ -49,7 +49,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CssSelectorTests.cs" />
     <Compile Include="CssStylesheetTests.cs" />
     <Compile Include="HtmlDocumentExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

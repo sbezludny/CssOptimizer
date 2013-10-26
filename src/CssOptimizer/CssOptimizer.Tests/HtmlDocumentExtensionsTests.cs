@@ -14,20 +14,7 @@ namespace CssOptimizer.Tests
 	[TestFixture]
 	public class HtmlDocumentExtensionsTests
 	{
-		[TestCaseSource("LinksDataSource")]
-		public void ExtractExternalCssSources(string headHtmlSnippet, IEnumerable<string> sources)
-		{
-			//Arrange
-			var htmlDocument = GetHtmlDocument(headHtmlSnippet);
-
-			//Act
-			var uriSet = htmlDocument.GetExternalCssLinks();
-
-			//Assert
-			Assert.AreEqual(sources.ToJson(), uriSet.ToJson());
-		}
-
-		private static HtmlDocument GetHtmlDocument(string headHtmlSnippet)
+		private HtmlDocument GetHtmlDocument(string headHtmlSnippet)
 		{
 			var html = @"
 					<!doctype html>
@@ -44,9 +31,22 @@ namespace CssOptimizer.Tests
 				";
 
 			html = String.Format(html, headHtmlSnippet);
-			var htmlDocument = new HtmlAgilityPack.HtmlDocument();
+			var htmlDocument = new HtmlDocument();
 			htmlDocument.LoadHtml(html);
 			return htmlDocument;
+		}
+
+		[TestCaseSource("CssLinksDataSource")]
+		public void ExtractExternalCssSources(string headHtmlSnippet, IEnumerable<string> sources)
+		{
+			//Arrange
+			var htmlDocument = GetHtmlDocument(headHtmlSnippet);
+
+			//Act
+			var uriSet = htmlDocument.GetExternalCssLinks();
+
+			//Assert
+			Assert.AreEqual(sources.ToJson(), uriSet.ToJson());
 		}
 
 		[TestCaseSource("InlineCssSource")]
@@ -62,7 +62,20 @@ namespace CssOptimizer.Tests
 			Assert.AreEqual(expectedInlineCss, inlineCss);
 		}
 
-		public static IEnumerable LinksDataSource
+		[TestCaseSource("LinksDataSource")]
+		public void ExtractNotExternalLinks(Uri pageUrl, string htmlSnippet, IEnumerable<string> expectedUrls)
+		{
+			//Arrange
+			var htmlDocument = GetHtmlDocument(htmlSnippet);
+
+			//Act
+			var links = htmlDocument.GetNotExternalLinks(pageUrl);
+
+			//Assert
+			CollectionAssert.AreEquivalent(expectedUrls, links.Select(z => z.ToString()));
+		}
+
+		static IEnumerable CssLinksDataSource
 		{
 			get
 			{
@@ -86,8 +99,7 @@ namespace CssOptimizer.Tests
 			}
 		}
 
-
-		public static IEnumerable InlineCssSource
+		static IEnumerable InlineCssSource
 		{
 			get
 			{
@@ -106,7 +118,8 @@ namespace CssOptimizer.Tests
 							font-weight:bold;
 						}
 		
-					</style>
+					</style>
+
 				", @".style1
 						{
 							font-style: italic;
@@ -123,5 +136,52 @@ namespace CssOptimizer.Tests
 			}
 		}
 
+		static IEnumerable LinksDataSource()
+		{
+			var htmlSnippet = @"
+					<header class=""header"">
+	<div class=""in"">
+		<strong class=""logo""><a href=""/"">UAWEB challenge</a></strong>
+		<nav class=""globalnav"">
+			<ul>
+                                <li><a href=""/about"" title=""Опис, правила, жюрі"">Про чемпіонат</a></li>
+                                <li><a href=""/calendar"" title=""Календар подій"">Календар</a></li>
+                			</ul>
+		</nav>
+	    		<div class=""member-login js-member-login""><a href=""#"">Вхід для учасників</a></div>
+	</div>
+</header>
+<!-- END header-->
+
+<!-- BEGIN social-float -->
+<div class=""social-float"">
+	<a href=""https://www.facebook.com/uawebchallenge"" class=""fb"">facebook</a>
+	<a href=""http://vk.com/uawebchallenge"" class=""vk"">vkontakte</a>
+	<a href=""http://twitter.com/#!/search?q=%23uwcua"" class=""tw"">twitter</a>
+</div>
+				";
+
+
+
+			yield return new TestCaseData(new Uri("http://uawebchallenge.com/"), htmlSnippet, new[]
+				{
+					"http://uawebchallenge.com/", 
+					"http://uawebchallenge.com/about", 
+					"http://uawebchallenge.com/calendar", 
+				});
+
+			yield return new TestCaseData(new Uri("http://uawebchallenge.com"), htmlSnippet, new[]
+				{
+					"http://uawebchallenge.com/", 
+					"http://uawebchallenge.com/about", 
+					"http://uawebchallenge.com/calendar", 
+				});
+			yield return new TestCaseData(new Uri("http://uawebchallenge.com/about"), htmlSnippet, new[]
+				{
+					"http://uawebchallenge.com/", 
+					"http://uawebchallenge.com/about", 
+					"http://uawebchallenge.com/calendar", 
+				});
+		}
 	}
 }

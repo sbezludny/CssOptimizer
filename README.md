@@ -27,18 +27,13 @@ CssOptimizer
 - Универсальный селектор (Universal selectors)
 - Селекторы тегов (Type selectors)
 - Селекторы атрибутов (Attribute selectors)
-
-##### В разработке
-
 - Идентификаторы (ID selectors)
 - Классы (Class selectors)
 - Вложенные селекторы (Descendant selectors)
 - Дочерние селекторы (Child selectors)
 - Соседние селекторы (Adjacent sibling selectors)
 - Родственные селекторы (General sibling selectors)
+- Частичная поддержка псевдоклассов ``` :first-child, :last-child, :only-child, :nth-child, :empty, :not, :contains, :disabled, :checked ```
 
 ### Известные ограничения
-- Игнорируются селекторы содержащие псевдо-классы описывающие
- состояния (``` :hover, :focus ``` и им подобные)
-
-### Зависимости
+- Не поддерживаются все @-правила, кроме ```@import```

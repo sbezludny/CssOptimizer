@@ -22,7 +22,7 @@ namespace CssOptimizer.Tests
 			var stylesheet = new CssStylesheet(null, css );
 
 			//Assert
-			Assert.AreEqual(expectedSelectors.ToJson(), stylesheet.Selectors.Select(z => z.OriginalSelector).ToJson());
+			Assert.AreEqual(expectedSelectors.ToJson(), stylesheet.Selectors.Select(z => z.RawSelector).ToJson());
 
 		}
 
@@ -35,7 +35,7 @@ namespace CssOptimizer.Tests
 			var styleSheet = new CssStylesheet(null, css);
 
 			//Assert
-			CollectionAssert.AreEquivalent(styleSheet.ImportLinks, importUrls);
+			CollectionAssert.AreEquivalent(styleSheet.Imports, importUrls);
 		}
 
 		public static IEnumerable CssDataSource
@@ -46,6 +46,7 @@ namespace CssOptimizer.Tests
 				yield return new TestCaseData("li li.selected { }", new[] { "li li.selected" });
 				yield return new TestCaseData("li, li.selected { }", new[] { "li", "li.selected" });
 				yield return new TestCaseData("li {} li.selected { }", new[] { "li", "li.selected" });
+				yield return new TestCaseData(@"@import url(""fineprint.css"") print; li {} li.selected { }", new[] { "li", "li.selected" });
 
 			}
 		}

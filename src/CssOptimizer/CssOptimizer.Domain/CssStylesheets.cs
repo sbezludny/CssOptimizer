@@ -8,24 +8,22 @@ using System.Threading.Tasks;
 
 namespace CssOptimizer.Domain
 {
-	public class CssStylesheets : ICssStylesheets
+	public class CssStylesheets
 	{
-		private readonly ConcurrentDictionary<Uri, CssStylesheet> _stylesheets = new ConcurrentDictionary<Uri, CssStylesheet>(); 
+		private readonly ConcurrentDictionary<Uri, CssStylesheet> _stylesheets = new ConcurrentDictionary<Uri, CssStylesheet>();
 
-		public CssStylesheet GetOrDownload(Uri uri)
+		public async Task<CssStylesheet> GetOrDownload(Uri uri)
 		{
 			CssStylesheet stylesheet;
 
-			if (!_stylesheets.TryGetValue(uri, out stylesheet))
-			{
-				using (var webClient = new WebClient())
-				{
-					var cssContent = webClient.DownloadString(uri);
-
-					stylesheet = new CssStylesheet(uri, cssContent);
-				}
-				_stylesheets.TryAdd(uri, stylesheet);
+			if (_stylesheets.TryGetValue(uri, out stylesheet)) 
+				return stylesheet;
+			
+			using (var webClient = new WebClient())
+			{ 
+				stylesheet = new CssStylesheet(uri, await webClient.DownloadStringTaskAsync(uri));
 			}
+			_stylesheets.TryAdd(uri, stylesheet);
 
 			return stylesheet;
 		}

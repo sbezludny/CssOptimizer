@@ -9,7 +9,7 @@ namespace CssOptimizer.Domain
 {
 	public static class HtmlDocumentExtensions
 	{
-		private static HtmlNodeCollection SelectNodeCollection(this HtmlNode node, string xPath)
+		private static IEnumerable<HtmlNode> SelectNodeCollection(this HtmlNode node, string xPath)
 		{
 			return node.SelectNodes(xPath) ?? new HtmlNodeCollection(null);
 		}
@@ -23,6 +23,25 @@ namespace CssOptimizer.Domain
 				.ToList();
 		}
 
+		public static IEnumerable<Uri> GetNotExternalLinks(this HtmlDocument html, Uri baseUrl)
+		{
+			var domain = baseUrl.GetLeftPart(UriPartial.Authority);
+
+
+			var xPath = String.Format(@"//a[
+							starts-with(@href, '{0}') 
+							or starts-with(@href, '/') 
+							or starts-with(@href, './') 
+							or starts-with(@href, '../')]", domain);
+
+			var hrefValues = html.DocumentNode
+				.SelectNodeCollection(xPath)
+				.AsParallel()
+				.Select(link => link.Attributes["href"].Value).ToList();
+
+			return hrefValues.Distinct().Select(z => new Uri(new Uri(domain), z)).ToList();
+		}
+
 		public static string GetInlineCss(this HtmlDocument html)
 		{
 			return html.DocumentNode
@@ -32,7 +51,14 @@ namespace CssOptimizer.Domain
 
 		public static bool HasElementsWithSelector(this HtmlDocument html, CssSelector selector)
 		{
-			return html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
+			try
+			{
+				return html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
+			}
+			catch (UnsupportedSelectorException ex)
+			{
+				return true;
+			}
 		}
 	}
 }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
@@ -11,14 +9,14 @@ namespace CssOptimizer.Domain
 {
 	public class WebPageAnalyzer
 	{
-		private readonly ICssStylesheets _stylesheets;
+		private readonly CssStylesheets _stylesheets;
 
-		public WebPageAnalyzer(ICssStylesheets stylesheets)
+		public WebPageAnalyzer(CssStylesheets stylesheets)
 		{
 			_stylesheets = stylesheets;
 		}
 
-		public Dictionary<Uri, IEnumerable<CssSelector>> GetUnusedCssSelectors(Uri uri)
+		public async Task<Dictionary<Uri, IEnumerable<CssSelector>>> GetUnusedCssSelectors(Uri uri)
 		{
 			var result = new Dictionary<Uri, IEnumerable<CssSelector>>();
 
@@ -29,9 +27,9 @@ namespace CssOptimizer.Domain
 				htmlDocument.LoadHtml(webClient.DownloadString(uri));
 			}
 
-			var cssUris = htmlDocument.GetExternalCssLinks().Select(href => ConvertToUri(uri, href));
+			
 
-			var styleSheets = cssUris.Select(cssUri => _stylesheets.GetOrDownload(cssUri)).ToList();
+			var styleSheets = new List<CssStylesheet>();
 
 			var inlineCss = htmlDocument.GetInlineCss();
 
@@ -39,6 +37,10 @@ namespace CssOptimizer.Domain
 			{
 				styleSheets.Add(new CssStylesheet(uri, inlineCss));
 			}
+
+			var cssUris = htmlDocument.GetExternalCssLinks().Select(href => ConvertToUri(uri, href)).ToList();
+
+			styleSheets.AddRange(await GetCssStylesheets(cssUris));
 
 			foreach (var stylesheet in styleSheets)
 			{
@@ -55,11 +57,18 @@ namespace CssOptimizer.Domain
 
 		}
 
+		private Task<CssStylesheet[]> GetCssStylesheets(IList<Uri> urls)
+		{
+			var tasks = new List<Task<CssStylesheet>>(urls.Count());
+			
+			tasks.AddRange(urls.Select(url => Task.Run(async () => await _stylesheets.GetOrDownload(url))));
+
+			return Task.WhenAll(tasks);
+		}
+
 		private IEnumerable<CssSelector> GetUnusedSelectors(HtmlDocument document, CssStylesheet stylesheet)
 		{
-			return stylesheet.Selectors
-				.Where(selector => !document.HasElementsWithSelector(selector))
-				.ToList();
+			return stylesheet.Selectors.AsParallel().Where(selector => !document.HasElementsWithSelector(selector)).ToList();
 		} 
 
 		private Uri ConvertToUri(Uri baseUrl, string href)

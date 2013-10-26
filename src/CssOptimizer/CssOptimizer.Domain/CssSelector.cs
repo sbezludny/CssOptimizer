@@ -1,174 +1,79 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using CssOptimizer.Domain.Utils;
 
 namespace CssOptimizer.Domain
 {
 	public class CssSelector
 	{
-		public string OriginalSelector { get; set; }
-
-		/// <summary>
-		/// Селектор тега
-		/// </summary>
-		public string Tag { get; set; }
-
-		/// <summary>
-		/// Классы
-		/// </summary>
-		public List<string> Classes { get; set; }
-
-		/// <summary>
-		/// Идентификатор
-		/// </summary>
-		public string Id { get; set; }
-
-		/// <summary>
-		/// Контекстные селекторы
-		/// </summary>
-		public List<CssSelector> ContextSelectors { get; set; }
-
-		/// <summary>
-		/// Соседние селекторы
-		/// Селектор 1 + Селектор 2
-		/// </summary>
-		public List<CssSelector> TraversalSelectors { get; set; }
-
-
-		/// <summary>
-		/// Дочерние селекторы
-		/// Селектор 1 > Селектор 2
-		/// </summary>
-		public IEnumerable<CssSelector> ChildSelectors { get; set; }
-
-		/// <summary>
-		/// Селекторы атрибутов
-		/// </summary>
-		public List<CssAttribute> Attributes { get; set; }
-
-		public List<string> PseudoClasses { get; set; }
-
-		public string PseudoElement { get; set; }
-
-		public string UniversalSelector { get; set; }
-
-		internal CssSelector()
+		public string RawSelector { get; set; }
+		
+		public static readonly string[] UnsupportedAtRules =
 		{
-			Classes = new List<string>();
-			PseudoClasses = new List<string>();
-			ContextSelectors = new List<CssSelector>();
-			TraversalSelectors = new List<CssSelector>();
-			ChildSelectors = new List<CssSelector>();
-			Attributes = new List<CssAttribute>();
+			"@charset",
+			"@document",
+			"@font-face",
+			"@import",
+			"@keyframes",
+			"@media",
+			"@namespace",
+			"@page",
+			"@supports"
+		};
+
+		public static readonly string[] UnsupportedPseudoSelectors =
+		{
+			":indeterminate", 
+			":first-line", 
+			":first-letter",
+            ":selection", 
+			":before", 
+			":after", 
+			":link", 
+			":visited",
+			":active", 
+			":focus", 
+			":hover",
+			":enabled"
+		};
+		
+		public CssSelector(string selector)
+		{
+			Ensure.NotNullOrEmpty(selector, "selector");
+
+			RawSelector = selector;
 		}
-
-		public CssSelector(string selector):this()
+		public string ToXPath()
 		{
-			OriginalSelector = selector;
-			const string pattern =
-				@"^(?<Type>[\*|\w|\-]+)?(?<Id>#[\w|\-]+)?(?<Classes>\.[\w|\-|\.]+)*(?<Attributes>\[.+\])*(?<PseudoClasses>:[\*|\w]+)*$";
-
-			var regex = new Regex(pattern);
-
-			var matches = regex.Matches(selector);
-
-			foreach (Match match in matches)
+			if (UnsupportedPseudoSelectors.Any(RawSelector.Contains))
 			{
-
-				//todo:refactor
-				
-
-				ProcessType(match.Groups["Type"].Value);
-
-				ProcessId(match.Groups["Id"].Value);
-
-				ProcessClasses(match.Groups["Classes"].Value);
-
-				ProcessAttributes(match.Groups["Attributes"].Value);
+				var message = String.Format("Селектор `{0}` содержит не поддерживаемый селектор `{1}`.",
+									RawSelector,
+									UnsupportedPseudoSelectors.FirstOrDefault(RawSelector.Contains));
+				throw new UnsupportedSelectorException(message);
 			}
 
-		}
-
-		private void ProcessClasses(string selector)
-		{
-			if (String.IsNullOrWhiteSpace(selector))
-				return;
-
-			var regex = new Regex(@".(?<class>\w+)");
-			var matchResult = regex.Match(selector);
-			while (matchResult.Success)
+			if (UnsupportedAtRules.Any(RawSelector.Contains))
 			{
-				Classes.Add(matchResult.Groups["class"].Value);
-				matchResult = matchResult.NextMatch();
-			} 
-
-		}
-
-		private void ProcessAttributes(string selector)
-		{
-			if (String.IsNullOrWhiteSpace(selector))
-				return;
-
-			var regex = new Regex(CssAttribute.MatchingPattern);
-			var matchResult = regex.Match(selector);
-			while (matchResult.Success)
-			{
-				Attributes.Add(new CssAttribute(matchResult.Value));
-				matchResult = matchResult.NextMatch();
-			} 
-
-
-		}
-
-		private void ProcessId(string id)
-		{
-			if (String.IsNullOrWhiteSpace(id))
-				return;
-
-			Id = id.TrimStart('#');
-		}
-
-		private void ProcessType(string type)
-		{
-			if (String.IsNullOrWhiteSpace(type))
-				return;
-
-			if (type == "*")
-			{
-				UniversalSelector = type;
+				throw new UnsupportedSelectorException("@-правила не поддерживаются.");
 			}
-			else
-			{
-				Tag = type;
-			}
+
+			return CssSelectorParser.Transform(RawSelector);
 		}
 
 		public override string ToString()
 		{
-			return OriginalSelector;
+			return RawSelector;
 		}
 
-		public string ToXPath()
+		
+	}
+
+	public class UnsupportedSelectorException : Exception
+	{
+		public UnsupportedSelectorException(string message)
+			: base(message)
 		{
-			var xpath = "//";
-
-			if (UniversalSelector != null)
-				xpath += "*";
-
-			if (Tag != null)
-				xpath += Tag;
-
-			if (Attributes.Any())
-			{
-				xpath += String.Format("[{0}]", String.Join(" and ", Attributes.Select(a => a.ToXPath())));
-			}
-
-			//todo:remove
-			if (xpath == "//")
-				xpath += "*";
-
-			return xpath;
 		}
 	}
 }
