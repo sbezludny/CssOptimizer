@@ -22,7 +22,6 @@ namespace CssOptimizer.Domain
 			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*])\+([a-zA-Z0-9_\-\*])"), "$1/following-sibling::*[1]/self::$2");
 			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*])>([a-zA-Z0-9_\-\*])"), "$1/$2");
 
-			// Escaping
 			Patterns.Add(new Regex(@"\[([^=]+)=([^'|" + "\"" + @"][^\]]*)\]"), "[$1='$2']");
 
 			Patterns.Add(new Regex(@"(^|[^a-zA-Z0-9_\-\*])(#|\.)([a-zA-Z0-9_\-]+)"), "$1*$2$3");
@@ -84,10 +83,10 @@ namespace CssOptimizer.Domain
 			// :contains
 			Patterns.Add(new Regex(@":contains\(([^\)]*)\)"), new MatchEvaluator(m => "[contains(string(.),'" + m.Groups[1].Value + "')]"));
 
-			// Псевдокласс :disabled
+			// :disabled
 			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*]+):disabled"), "$1[@disabled]");
 
-			// Псевдокласс :checked
+			// :checked
 			Patterns.Add(new Regex(@"([a-zA-Z0-9_\-\*]+):checked"), "$1[@checked]");
 
 			// != атрибут

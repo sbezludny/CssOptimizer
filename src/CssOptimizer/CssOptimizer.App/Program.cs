@@ -48,13 +48,13 @@ namespace CssOptimizer.App
 			foreach (var pageRuleSet in results)
 			{
 				sb.AppendLine(pageRuleSet.Key.ToString());
-				sb.AppendLine("=====");
+				sb.AppendLine("=====================");
 				foreach (var selector in pageRuleSet.Value)
 				{
 					sb.AppendLine(selector.ToString());
 				}
 
-				sb.AppendLine("=====");
+				sb.AppendLine("=====================");
 			}
 
 			return sb.ToString();
