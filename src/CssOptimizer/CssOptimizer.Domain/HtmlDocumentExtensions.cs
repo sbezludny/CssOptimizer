@@ -15,7 +15,7 @@ namespace CssOptimizer.Domain
 			return node.SelectNodes(xPath) ?? new HtmlNodeCollection(null);
 		}
 
-		public static IEnumerable<string> GetExternalCssLinks(this HtmlDocument html)
+		public static IEnumerable<string> GetExternalCssUrls(this HtmlDocument html)
 		{
 			return html.DocumentNode
 				.SelectNodeCollection("//link[@rel='stylesheet' and (@href)]")
@@ -24,7 +24,7 @@ namespace CssOptimizer.Domain
 				.ToList();
 		}
 
-		public static IEnumerable<Uri> GetNotExternalLinks(this HtmlDocument html, Uri baseUrl)
+		public static IEnumerable<Uri> GetInternalLinks(this HtmlDocument html, Uri baseUrl)
 		{
 			var domain = baseUrl.GetLeftPart(UriPartial.Authority);
 
@@ -52,18 +52,7 @@ namespace CssOptimizer.Domain
 
 		public static bool IsSelectorInUse(this HtmlDocument html, CssSelector selector)
 		{
-			bool hasElementsWithSelector;
-			try
-			{
-				hasElementsWithSelector = html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
-			}
-			catch (Exception)
-			{
-				var t = 3;
-				throw;
-			}
-			
-			return hasElementsWithSelector;
+			return html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
 		}
 	}
 }

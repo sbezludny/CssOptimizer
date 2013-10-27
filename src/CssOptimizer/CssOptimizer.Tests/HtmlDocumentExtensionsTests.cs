@@ -43,7 +43,7 @@ namespace CssOptimizer.Tests
 			var htmlDocument = GetHtmlDocument(headHtmlSnippet);
 
 			//Act
-			var uriSet = htmlDocument.GetExternalCssLinks();
+			var uriSet = htmlDocument.GetExternalCssUrls();
 
 			//Assert
 			Assert.AreEqual(sources.ToJson(), uriSet.ToJson());
@@ -69,7 +69,7 @@ namespace CssOptimizer.Tests
 			var htmlDocument = GetHtmlDocument(htmlSnippet);
 
 			//Act
-			var links = htmlDocument.GetNotExternalLinks(pageUrl);
+			var links = htmlDocument.GetInternalLinks(pageUrl);
 
 			//Assert
 			CollectionAssert.AreEquivalent(expectedUrls, links.Select(z => z.ToString()));

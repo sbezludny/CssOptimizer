@@ -15,6 +15,12 @@ namespace CssOptimizer.App
 		[ValueList(typeof(List<string>))]
 		public IList<string> Urls { get; set; }
 
+		[Option('s', Required = false, HelpText = "Режим анализа сайта.")]
+		public bool SiteAnalysisMode { get; set; }
+
+		[Option('c', Required = false, HelpText = "Ограничение количества страниц при анализе сайта.")]
+		public int MaximumPages { get; set; }
+
 		[Option('o', Required = false, HelpText = "Путь к файлу с результатами.")]
 		public string OutputFile { get; set; }
 
@@ -38,7 +44,7 @@ namespace CssOptimizer.App
 			help.AddPreOptionsLine("");
 			help.AddPreOptionsLine("");
 
-			help.AddPreOptionsLine("Использование: ./CssOptimizer.App.exe url1 [url2...] [-o output_file]");
+			help.AddPreOptionsLine("Использование: ./CssOptimizer.App.exe url1 [url2...] [-s] [-c] [-o output_file]");
 
 			help.AddPreOptionsLine("");
 			help.AddPreOptionsLine("");

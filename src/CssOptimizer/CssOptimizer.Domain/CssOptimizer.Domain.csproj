@@ -46,12 +46,14 @@
     <Compile Include="CssStylesheet.cs" />
     <Compile Include="CssSelector.cs" />
     <Compile Include="CssStylesheets.cs" />
+    <Compile Include="Analysis\CssUsageInfo.cs" />
     <Compile Include="HtmlDocumentExtensions.cs" />
+    <Compile Include="Analysis\PageAnalysisResult.cs" />
     <Compile Include="UnsupportedSelectorException.cs" />
     <Compile Include="Utils\Ensure.cs" />
     <Compile Include="Utils\UrlHelper.cs" />
     <Compile Include="Utils\WebClientHelper.cs" />
-    <Compile Include="WebPageAnalyzer.cs" />
+    <Compile Include="Analysis\PageAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
