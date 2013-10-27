@@ -23,14 +23,33 @@ namespace CssOptimizer.Domain
 
 			var result = new ConcurrentDictionary<Uri, IEnumerable<CssSelector>>();
 
-			var html = await GetHtmlDocumentAsync(pageUrl);
+			HtmlDocument html;
+			
+			try
+			{
+				html = await GetHtmlDocumentAsync(pageUrl);
+			}
+			catch (Exception ex)
+			{
+				throw new ArgumentException(String.Format("Произошла ошибка при запросe страницы с адресом `{0}`.", pageUrl), ex);
+			}
+			
 
 			var cssUrls = html.GetExternalCssLinks()
 				.Select(href => UrlHelper.CreateFromHref(pageUrl, href)).ToList();
 
 			var tasks = cssUrls.Select(cssUrl => Task.Run(async () =>
 			{
-				var stylesheet = await _stylesheets.GetOrDownload(cssUrl);
+				CssStylesheet stylesheet;
+				try
+				{
+					stylesheet = await _stylesheets.GetOrDownload(cssUrl);
+				}
+				catch (Exception ex)
+				{
+					throw new ArgumentException(String.Format("Произошла ошибка при запросe css-файла с адресом `{0}`.", pageUrl), ex);
+				}
+				
 
 				AnalyzeCssStylesheet(stylesheet, html, result);
 			})).ToList();

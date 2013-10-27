@@ -21,8 +21,18 @@ namespace CssOptimizer.App
 			var sw = new Stopwatch();
 			sw.Start();
 #endif
-
-			MainAsync(args).Wait();
+			try
+			{
+				MainAsync(args).Wait();
+			}
+			catch (AggregateException ex)
+			{
+				foreach (var exception in ex.InnerExceptions)
+				{
+					Console.Error.WriteLine(exception.Message);
+				}
+			}
+			
 
 
 #if DEBUG
