@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,70 +18,76 @@ namespace CssOptimizer.Domain
 			_stylesheets = stylesheets;
 		}
 
-		public async Task<Dictionary<Uri, IEnumerable<CssSelector>>> GetUnusedCssSelectors(Uri uri)
+		public async Task<IDictionary<Uri, IEnumerable<CssSelector>>> GetUnusedCssSelectors(Uri pageUrl)
 		{
-			var result = new Dictionary<Uri, IEnumerable<CssSelector>>();
 
-			var htmlDocument = GetHtml(uri);
+			var result = new ConcurrentDictionary<Uri, IEnumerable<CssSelector>>();
 
-			var styleSheets = new List<CssStylesheet>();
+			var html = await GetHtmlDocumentAsync(pageUrl);
 
-			var inlineCss = htmlDocument.GetInlineCss();
+			var cssUrls = html.GetExternalCssLinks()
+				.Select(href => UrlHelper.CreateFromHref(pageUrl, href)).ToList();
 
-			if (!String.IsNullOrWhiteSpace(inlineCss))
+			var tasks = cssUrls.Select(cssUrl => Task.Run(async () =>
 			{
-				styleSheets.Add(new CssStylesheet(uri, inlineCss));
+				var stylesheet = await _stylesheets.GetOrDownload(cssUrl);
+
+				AnalyzeCssStylesheet(stylesheet, html, result);
+			})).ToList();
+
+			if (!String.IsNullOrWhiteSpace(html.GetInlineCss()))
+			{
+				var inlineCss = html.GetInlineCss();
+
+				var styleSheet = new CssStylesheet(pageUrl, inlineCss);
+
+				AnalyzeCssStylesheet(styleSheet, html, result);
 			}
 
-			var cssUrls = htmlDocument.GetExternalCssLinks().Select(href => UrlHelper.CreateFromHref(uri, href)).ToList();
-
-			
-
-			styleSheets.AddRange(await GetCssStylesheets(cssUrls));
-
-			foreach (var stylesheet in styleSheets)
-			{
-				var unusedSelectors = GetUnusedSelectors(htmlDocument, stylesheet);
-
-				if (unusedSelectors.Any())
-				{
-					result.Add(stylesheet.Url, unusedSelectors);
-				}
-			}
+			await Task.WhenAll(tasks);
 
 			return result;
 
 
 		}
 
-		
+		private static void AnalyzeCssStylesheet(CssStylesheet stylesheet, HtmlDocument html, ConcurrentDictionary<Uri, IEnumerable<CssSelector>> result)
+		{
+			var unusedSelectors = stylesheet.Selectors
+				.AsParallel()
+				.Where(s => !html.IsSelectorInUse(s))
+				.ToList();
 
-		private static HtmlDocument GetHtml(Uri uri)
+			if (unusedSelectors.Any())
+			{
+				result.TryAdd(stylesheet.Url, unusedSelectors);
+			}
+		}
+
+
+		private async Task<HtmlDocument> GetHtmlDocumentAsync(Uri uri)
 		{
 			var htmlDocument = new HtmlDocument();
 
+			string html;
 			using (var webClient = new WebClient())
 			{
-				htmlDocument.LoadHtml(webClient.DownloadString(uri));
+				webClient.Proxy = null;
+
+				html = await webClient.DownloadStringTaskAsync(uri);
 			}
+			htmlDocument.LoadHtml(html);
 			return htmlDocument;
 		}
 
-		private Task<CssStylesheet[]> GetCssStylesheets(IList<Uri> urls)
-		{
-			var tasks = new List<Task<CssStylesheet>>(urls.Count());
-			
-			tasks.AddRange(urls.Select(url => Task.Run(async () => await _stylesheets.GetOrDownload(url))));
+		
 
-			return Task.WhenAll(tasks);
-		}
+	}
 
-		private IEnumerable<CssSelector> GetUnusedSelectors(HtmlDocument document, CssStylesheet stylesheet)
-		{
-			return stylesheet.Selectors
-				.Where(selector => !document.HasElementsWithSelector(selector)).ToList();
-		} 
+	public class CssStylesheetUsageResult
+	{
+		public Uri Url { get; set; }
 
-
+		public IEnumerable<CssSelector> UnusedCssSelectors { get; set; } 
 	}
 }

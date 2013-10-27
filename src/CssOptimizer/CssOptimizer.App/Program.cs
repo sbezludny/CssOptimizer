@@ -58,15 +58,15 @@ namespace CssOptimizer.App
 
 					var results = await analyzer.GetUnusedCssSelectors(uri);
 
-					var formatResults = FormatResults(uri, results);
+					var formatedResults = FormatResults(uri, results);
 
 
 
-					Console.Write(formatResults);
+					Console.Write(formatedResults);
 
 					if (!String.IsNullOrWhiteSpace(options.OutputFile))
 					{
-						File.AppendAllText(options.GetOutputFileName(), formatResults);
+						File.AppendAllText(options.GetOutputFileName(), formatedResults);
 					}
 
 				})).ToList();
@@ -74,14 +74,9 @@ namespace CssOptimizer.App
 				await Task.WhenAll(tasks);
 
 			}
-
-						
 		}
 
-		
-
-
-		private static string FormatResults(Uri url, Dictionary<Uri, IEnumerable<CssSelector>> results)
+		private static string FormatResults(Uri url, IEnumerable<KeyValuePair<Uri, IEnumerable<CssSelector>>> results)
 		{
 			var sb = new StringBuilder();
 

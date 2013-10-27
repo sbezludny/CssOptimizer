@@ -41,9 +41,9 @@ namespace CssOptimizer.Domain
 
 		private void EnsureSupportedPseudoClass(string selector)
 		{
-			if (selector.Contains(":"))
-			{
-				var s = selector;
+			var s = selector;
+			if (s.Contains(":"))
+			{	
 				if (Regex.Replace(s, _supportedPseudoClassesPattern, "").Contains(":"))
 				{
 					var message = String.Format("Селектор `{0}` содержит не поддерживаемый псевдокласс.", selector);

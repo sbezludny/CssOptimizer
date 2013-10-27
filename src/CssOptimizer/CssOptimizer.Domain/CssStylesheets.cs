@@ -19,11 +19,17 @@ namespace CssOptimizer.Domain
 
 			if (_stylesheets.TryGetValue(uri, out stylesheet)) 
 				return stylesheet;
-			
+
+			string css;
+
 			using (var webClient = new WebClient())
-			{ 
-				stylesheet = new CssStylesheet(uri, await webClient.DownloadStringTaskAsync(uri));
+			{
+				webClient.Proxy = null;
+				css = await webClient.DownloadStringTaskAsync(uri);
 			}
+
+			stylesheet = new CssStylesheet(uri, css);
+			
 			_stylesheets.TryAdd(uri, stylesheet);
 
 			return stylesheet;

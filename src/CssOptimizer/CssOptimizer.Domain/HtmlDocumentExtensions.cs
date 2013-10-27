@@ -18,7 +18,7 @@ namespace CssOptimizer.Domain
 		public static IEnumerable<string> GetExternalCssLinks(this HtmlDocument html)
 		{
 			return html.DocumentNode
-				.SelectNodeCollection("//link[@rel='stylesheet'] and (@href)")
+				.SelectNodeCollection("//link[@rel='stylesheet' and (@href)]")
 				.Select(link => link.Attributes["href"].Value.Trim())
 				.Distinct()
 				.ToList();
@@ -50,9 +50,20 @@ namespace CssOptimizer.Domain
 				.Aggregate(String.Empty, (inline, node) => inline + Regex.Replace(node.InnerText, @"<!--[\s\S]*?-->", "").Trim());
 		}
 
-		public static bool HasElementsWithSelector(this HtmlDocument html, CssSelector selector)
+		public static bool IsSelectorInUse(this HtmlDocument html, CssSelector selector)
 		{
-			return html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
+			bool hasElementsWithSelector;
+			try
+			{
+				hasElementsWithSelector = html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
+			}
+			catch (Exception)
+			{
+				var t = 3;
+				throw;
+			}
+			
+			return hasElementsWithSelector;
 		}
 	}
 }
