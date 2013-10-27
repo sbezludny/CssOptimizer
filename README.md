@@ -54,4 +54,4 @@ CssOptimizer
 - Частичная поддержка псевдоклассов ``` :first-child, :last-child, :only-child, :nth-child, :empty, :not, :contains, :disabled, :checked ```
 
 ### Известные ограничения
-- Не поддерживаются все @-правила, кроме ```@import```
+- Не поддерживаются @-правила
