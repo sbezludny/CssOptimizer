@@ -31,9 +31,6 @@ namespace CssOptimizer.App
 			Console.WriteLine(sw.ElapsedMilliseconds);
 #endif
 			
-#if DEBUG
-			Console.ReadKey();
-#endif
 			
 		}
 
