@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
@@ -17,8 +18,8 @@ namespace CssOptimizer.Domain
 		public static IEnumerable<string> GetExternalCssLinks(this HtmlDocument html)
 		{
 			return html.DocumentNode
-				.SelectNodeCollection("//link[@rel='stylesheet']")
-				.Select(link => link.Attributes["href"].Value)
+				.SelectNodeCollection("//link[@rel='stylesheet'] and (@href)")
+				.Select(link => link.Attributes["href"].Value.Trim())
 				.Distinct()
 				.ToList();
 		}
@@ -46,7 +47,7 @@ namespace CssOptimizer.Domain
 		{
 			return html.DocumentNode
 				.SelectNodeCollection("//style")
-				.Aggregate(String.Empty, (inline, node) => inline + node.InnerText.Trim());
+				.Aggregate(String.Empty, (inline, node) => inline + Regex.Replace(node.InnerText, @"<!--[\s\S]*?-->", "").Trim());
 		}
 
 		public static bool HasElementsWithSelector(this HtmlDocument html, CssSelector selector)

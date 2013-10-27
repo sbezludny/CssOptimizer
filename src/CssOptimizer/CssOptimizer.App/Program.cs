@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CssOptimizer.Domain;
+using CssOptimizer.Domain.Utils;
 
 namespace CssOptimizer.App
 {
@@ -49,7 +50,7 @@ namespace CssOptimizer.App
 				}
 
 				var tasks = options.Urls
-					.Select(ConvertToUrl)
+					.Select(UrlHelper.CreateInvariantToScheme)
 					.Select(uri => Task.Run(async () =>
 				{
 
@@ -77,15 +78,7 @@ namespace CssOptimizer.App
 						
 		}
 
-		private static Uri ConvertToUrl(string uriString)
-		{
-			var url = uriString;
-			if (!Uri.IsWellFormedUriString(uriString, UriKind.Absolute))
-			{
-				url = "http://" + uriString;
-			}
-			return new Uri(url);
-		}
+		
 
 
 		private static string FormatResults(Uri url, Dictionary<Uri, IEnumerable<CssSelector>> results)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using CssOptimizer.Domain.Utils;
 using HtmlAgilityPack;
 
 namespace CssOptimizer.Domain
@@ -31,7 +32,7 @@ namespace CssOptimizer.Domain
 				styleSheets.Add(new CssStylesheet(uri, inlineCss));
 			}
 
-			var cssUrls = htmlDocument.GetExternalCssLinks().Select(href => ConvertToUri(uri, href)).ToList();
+			var cssUrls = htmlDocument.GetExternalCssLinks().Select(href => UrlHelper.CreateFromHref(uri, href)).ToList();
 
 			
 
@@ -76,16 +77,10 @@ namespace CssOptimizer.Domain
 
 		private IEnumerable<CssSelector> GetUnusedSelectors(HtmlDocument document, CssStylesheet stylesheet)
 		{
-			return stylesheet.Selectors.AsParallel().Where(selector => !document.HasElementsWithSelector(selector)).ToList();
+			return stylesheet.Selectors
+				.Where(selector => !document.HasElementsWithSelector(selector)).ToList();
 		} 
 
-		private Uri ConvertToUri(Uri baseUrl, string href)
-		{
-			if(Uri.IsWellFormedUriString(href, UriKind.Absolute))
-				return new Uri(href);
-
-			return new Uri(baseUrl, href);
-		}
 
 	}
 }
