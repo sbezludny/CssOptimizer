@@ -20,32 +20,36 @@ namespace CssOptimizer.Domain
 
 		public async Task<IDictionary<Uri, IEnumerable<CssSelector>>> GetUnusedCssSelectors(Uri pageUrl)
 		{
-
 			var result = new ConcurrentDictionary<Uri, IEnumerable<CssSelector>>();
 
 			var html = ParseHtml(await WebClientHelper.DownloadStringAsync(pageUrl));
 
-			var cssUrls = html.GetExternalCssLinks()
-				.Select(href => UrlHelper.CreateFromHref(pageUrl, href)).ToList();
+			AnalyzeInternalStyles(pageUrl, html, result);
+
+			await AnalyzeExternalStyles(pageUrl, html, result);
+
+			return result;
+		}
+
+		private async Task AnalyzeExternalStyles(Uri pageUrl, HtmlDocument html, ConcurrentDictionary<Uri, IEnumerable<CssSelector>> result)
+		{
+			var cssUrls = html
+				.GetExternalCssLinks()
+				.Select(href => UrlHelper.CreateFromHref(pageUrl, href))
+				.ToList();
 
 			var tasks = cssUrls.Select(cssUrl => Task.Run(async () =>
 			{
 				var stylesheet = await _stylesheets.GetOrDownload(cssUrl);
 
 				AnalyzeCssStylesheet(stylesheet, html, result);
-
 			})).ToList();
-
-			AnalyzeInlineStyles(pageUrl, html, result);
 
 			await Task.WhenAll(tasks);
 
-			return result;
-
-
 		}
 
-		private static void AnalyzeInlineStyles(Uri pageUrl, HtmlDocument html, ConcurrentDictionary<Uri, IEnumerable<CssSelector>> result)
+		private static void AnalyzeInternalStyles(Uri pageUrl, HtmlDocument html, ConcurrentDictionary<Uri, IEnumerable<CssSelector>> result)
 		{
 			if (String.IsNullOrWhiteSpace(html.GetInlineStyles())) 
 				return;
