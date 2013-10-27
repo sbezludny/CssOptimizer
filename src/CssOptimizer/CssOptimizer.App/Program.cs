@@ -22,7 +22,7 @@ namespace CssOptimizer.App
 
 					if (options.SiteAnalysisMode)
 					{
-						processor.AnalyzeWebSite(options).Wait();
+						processor.AnalyzeWebSites(options).Wait();
 					}
 					else
 					{

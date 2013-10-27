@@ -14,12 +14,7 @@ namespace CssOptimizer.App
 {
 	class Processor
 	{
-		private readonly CssStylesheets _cssStylesheets;
-
-		public Processor()
-		{
-			_cssStylesheets = new CssStylesheets();
-		}
+		private readonly CssStylesheets _cssStylesheets = new CssStylesheets();
 
 		public async Task AnalyzeWebPages(Options options)
 		{
@@ -32,29 +27,25 @@ namespace CssOptimizer.App
 				{
 
 					var analyzer = new PageAnalyzer(_cssStylesheets);
-					HtmlDocument htmlDocument = null;
 					try
 					{
-						htmlDocument = await GetHtml(uri);
+						var htmlDocument = await GetHtml(uri);
+
+						var analysisResult = await analyzer.Analyze(uri, htmlDocument);
+
+						WriteResults(analysisResult, options);
 					}
 					catch (UnsupportedContentTypeException ex)
 					{
-						return;
+						
 					}
-					
-
-
-
-					var analysisResult = await analyzer.Analyze(uri, htmlDocument);
-
-					WriteResults(analysisResult, options);
 
 				})).ToList();
 
 			await Task.WhenAll(tasks);
 		}
 
-		public async Task AnalyzeWebSite(Options options)
+		public async Task AnalyzeWebSites(Options options)
 		{
 			Cleanup(options);
 
@@ -64,11 +55,11 @@ namespace CssOptimizer.App
 
 			analyzedPages.TryAdd(pageUrl.ToString(), pageUrl);
 			
-			await GetValue(pageUrl, analyzedPages, options);
+			await AnalyzePage(pageUrl, analyzedPages, options);
 
 		}
 
-		private async Task GetValue(Uri pageUrl, ConcurrentDictionary<string, Uri> analyzedPages, Options options)
+		private async Task AnalyzePage(Uri pageUrl, ConcurrentDictionary<string, Uri> analyzedPages, Options options)
 		{
 
 			PageAnalysisResult analysisResult;
@@ -89,11 +80,19 @@ namespace CssOptimizer.App
 			{
 				if (analyzedPages.Count < options.MaximumPages || options.MaximumPages == 0)
 				{
+					if (options.MaximumDepth != 0)
+					{
+						if (internalLink.Segments.Length > options.MaximumDepth)
+							return;
+					}
+					
 					if (analyzedPages.TryAdd(internalLink.ToString(), internalLink))
 					{
-						await GetValue(internalLink, analyzedPages, options);
+						await AnalyzePage(internalLink, analyzedPages, options);
 					}
 				}
+
+				
 			}
 		}
 
@@ -135,8 +134,7 @@ namespace CssOptimizer.App
 				sb.AppendLine("=====================");
 
 
-				if(!options.Quite)
-					cssUsageInfo.UnusedSelectors.ToList().ForEach((selector => sb.AppendLine(selector.ToString())));
+				cssUsageInfo.UnusedSelectors.ToList().ForEach((selector => sb.AppendLine(selector.ToString())));
 
 				
 			}
