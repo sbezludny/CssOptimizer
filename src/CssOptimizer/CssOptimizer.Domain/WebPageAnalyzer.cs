@@ -23,44 +23,39 @@ namespace CssOptimizer.Domain
 
 			var result = new ConcurrentDictionary<Uri, IEnumerable<CssSelector>>();
 
-			var htmlSource = await WebClientHelper.DownloadStringAsync(pageUrl);
-			
-			var html = ParseHtml(htmlSource);
-
+			var html = ParseHtml(await WebClientHelper.DownloadStringAsync(pageUrl));
 
 			var cssUrls = html.GetExternalCssLinks()
 				.Select(href => UrlHelper.CreateFromHref(pageUrl, href)).ToList();
 
 			var tasks = cssUrls.Select(cssUrl => Task.Run(async () =>
 			{
-				CssStylesheet stylesheet;
-				try
-				{
-					stylesheet = await _stylesheets.GetOrDownload(cssUrl);
-				}
-				catch (Exception ex)
-				{
-					throw new ArgumentException(String.Format("Произошла ошибка при запросe css-файла с адресом `{0}`.", pageUrl), ex);
-				}
-				
+				var stylesheet = await _stylesheets.GetOrDownload(cssUrl);
 
 				AnalyzeCssStylesheet(stylesheet, html, result);
+
 			})).ToList();
 
-			if (!String.IsNullOrWhiteSpace(html.GetInlineCss()))
-			{
-				var inlineCss = html.GetInlineCss();
-
-				var styleSheet = new CssStylesheet(pageUrl, inlineCss);
-
-				AnalyzeCssStylesheet(styleSheet, html, result);
-			}
+			AnalyzeInlineStyles(pageUrl, html, result);
 
 			await Task.WhenAll(tasks);
 
 			return result;
 
 
+		}
+
+		private static void AnalyzeInlineStyles(Uri pageUrl, HtmlDocument html, ConcurrentDictionary<Uri, IEnumerable<CssSelector>> result)
+		{
+			if (String.IsNullOrWhiteSpace(html.GetInlineStyles())) 
+				return;
+			
+			
+			var inlineCss = html.GetInlineStyles();
+
+			var styleSheet = new CssStylesheet(pageUrl, inlineCss);
+
+			AnalyzeCssStylesheet(styleSheet, html, result);
 		}
 
 		private static HtmlDocument ParseHtml(string htmlSource)

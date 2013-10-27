@@ -43,7 +43,7 @@ namespace CssOptimizer.Domain
 			return hrefValues.Distinct().Select(z => new Uri(new Uri(domain), z)).ToList();
 		}
 
-		public static string GetInlineCss(this HtmlDocument html)
+		public static string GetInlineStyles(this HtmlDocument html)
 		{
 			return html.DocumentNode
 				.SelectNodeCollection("//style")

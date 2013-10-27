@@ -23,7 +23,12 @@ namespace CssOptimizer.App
 #endif
 			try
 			{
-				MainAsync(args).Wait();
+				var options = new Options();
+
+				if (CommandLine.Parser.Default.ParseArguments(args, options))
+				{
+					AnalyzeWebPages(options).Wait();
+				}
 			}
 			catch (AggregateException ex)
 			{
@@ -44,13 +49,8 @@ namespace CssOptimizer.App
 			
 		}
 
-		private static async Task MainAsync(string[] args)
+		private static async Task AnalyzeWebPages(Options options)
 		{
-			var options = new Options();
-
-			if (CommandLine.Parser.Default.ParseArguments(args, options))
-			{
-
 				if (!String.IsNullOrWhiteSpace(options.OutputFile))
 				{
 					File.Create(options.GetOutputFileName());
@@ -79,8 +79,6 @@ namespace CssOptimizer.App
 				})).ToList();
 
 				await Task.WhenAll(tasks);
-
-			}
 		}
 
 		private static string FormatResults(Uri url, IEnumerable<KeyValuePair<Uri, IEnumerable<CssSelector>>> results)

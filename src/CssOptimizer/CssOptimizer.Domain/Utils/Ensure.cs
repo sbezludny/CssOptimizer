@@ -9,11 +9,5 @@ namespace CssOptimizer.Domain.Utils
 			if (string.IsNullOrEmpty(argument))
 				throw new ArgumentNullException(argument, argumentName);
 		}
-
-		public static void NotNull<T>(T argument, string argumentName) where T : class
-		{
-			if (argument == null)
-				throw new ArgumentNullException(argumentName);
-		}
 	}
 }

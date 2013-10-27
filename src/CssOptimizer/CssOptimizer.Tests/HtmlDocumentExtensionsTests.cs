@@ -56,7 +56,7 @@ namespace CssOptimizer.Tests
 			var htmlDocument = GetHtmlDocument(htmlSnippet);
 
 			//Act
-			var inlineCss = htmlDocument.GetInlineCss();
+			var inlineCss = htmlDocument.GetInlineStyles();
 
 			//Assert
 			Assert.AreEqual(expectedInlineCss, inlineCss);
