@@ -47,7 +47,7 @@ namespace CssOptimizer.App
 			help.AddPreOptionsLine("");
 			help.AddPreOptionsLine("");
 
-			help.AddPreOptionsLine("Использование: ./CssOptimizer.App.exe url1 [url2...] [-s] [-c] [-o output_file]");
+			help.AddPreOptionsLine("Использование: ./CssOptimizer.App.exe url1 [url2…] [-s] [-c max_pages] [-d max_depth] [-o output_file]");
 
 			help.AddPreOptionsLine("");
 			help.AddPreOptionsLine("");

@@ -7,7 +7,7 @@ namespace CssOptimizer.Domain.Analysis
 	{
 		public Uri Url { get; set; }
 		public IEnumerable<CssSelector> UnusedSelectors { get; set; }
-
+		
 		public CssUsageInfo(Uri url, IEnumerable<CssSelector> unusedSelectors)
 		{
 			Url = url;

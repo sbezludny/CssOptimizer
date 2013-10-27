@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CssOptimizer.Domain
+namespace CssOptimizer.Domain.Exceptions
 {
 	public class UnsupportedContentTypeException : Exception
 	{

@@ -16,9 +16,6 @@ CssOptimizer
 - Анализ всего сайта с возможностью задания к-ва страниц
 - Задание глубины вложенности при анализе сайта
 
-##### В разработке
-- Анализ css-файлов подключаемых через ```@import```
-
 ### Поддерживаемые селекторы
 
 - Универсальный селектор (Universal selectors)
@@ -32,9 +29,13 @@ CssOptimizer
 - Родственные селекторы (General sibling selectors)
 - Частичная поддержка псевдоклассов ``` :first-child, :last-child, :only-child, :nth-child, :empty, :not, :contains, :disabled, :checked ```
 
+### Известные ограничения
+- Анализ css-файлов подключаемых через ```@import```
+- Не поддерживаются @-правила
+
 #### Синтаксис 
 
-	> ./CssOptimizer.App.exe <url1> [url2…] [-s] [-c max_pages] [-d max_depth] [-q] [-o output_file]
+	> ./CssOptimizer.App.exe url1 [url2…] [-s] [-c max_pages] [-d max_depth] [-o output_file]
 
 #### Описание
 
@@ -62,5 +63,3 @@ CssOptimizer
 ###### Пример 4: запись результатов в файл в режиме анализа сайта с ограничением количества страниц и глубины
 	> ./CssOptimizer.App.exe http://uawebchallenge.com/ -s -c 10 -d 2 -o result.txt
 
-### Известные ограничения
-- Не поддерживаются @-правила

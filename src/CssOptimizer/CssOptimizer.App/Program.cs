@@ -29,8 +29,6 @@ namespace CssOptimizer.App
 						processor.AnalyzeWebPages(options).Wait();
 					}
 				}
-
-				//todo:handle no opts
 			}
 			catch (AggregateException ex)
 			{

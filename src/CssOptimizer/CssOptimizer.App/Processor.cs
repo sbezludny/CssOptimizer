@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CssOptimizer.Domain;
 using CssOptimizer.Domain.Analysis;
+using CssOptimizer.Domain.Exceptions;
 using CssOptimizer.Domain.Utils;
 using HtmlAgilityPack;
 
@@ -115,7 +116,7 @@ namespace CssOptimizer.App
 
 		private void WriteResults(PageAnalysisResult pageAnalysisResult, Options options)
 		{
-			var formattedResults = FormatResults(pageAnalysisResult, options);
+			var formattedResults = FormatResults(pageAnalysisResult);
 
 			Console.Write(formattedResults);
 
@@ -123,7 +124,7 @@ namespace CssOptimizer.App
 				File.AppendAllText(options.GetOutputFileName(), formattedResults);
 		}
 
-		private string FormatResults(PageAnalysisResult pageAnalysisResult, Options options)
+		private string FormatResults(PageAnalysisResult pageAnalysisResult)
 		{
 			var sb = new StringBuilder();
 
@@ -131,6 +132,7 @@ namespace CssOptimizer.App
 			{
 				sb.AppendLine("=====================");
 				sb.AppendFormat("{0} ---> {1}\r\n", pageAnalysisResult.Url, cssUsageInfo.Url);
+				sb.AppendFormat("Количество неиспользуемых селекторов: {0}\r\n", cssUsageInfo.UnusedSelectors.Count());
 				sb.AppendLine("=====================");
 
 

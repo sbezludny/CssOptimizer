@@ -50,8 +50,8 @@
     <Compile Include="HtmlDocumentExtensions.cs" />
     <Compile Include="Analysis\PageAnalysisResult.cs" />
     <Compile Include="HtmlDocuments.cs" />
-    <Compile Include="UnsupportedContentTypeException.cs" />
-    <Compile Include="UnsupportedSelectorException.cs" />
+    <Compile Include="Exceptions\UnsupportedContentTypeException.cs" />
+    <Compile Include="Exceptions\UnsupportedSelectorException.cs" />
     <Compile Include="Utils\Ensure.cs" />
     <Compile Include="Utils\UrlHelper.cs" />
     <Compile Include="Utils\WebClientHelper.cs" />

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using CssOptimizer.Domain.Exceptions;
 
 namespace CssOptimizer.Domain.Utils
 {
