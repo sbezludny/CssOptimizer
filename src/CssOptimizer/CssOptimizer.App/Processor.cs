@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CssOptimizer.Domain;
 using CssOptimizer.Domain.Analysis;
 using CssOptimizer.Domain.Utils;
+using HtmlAgilityPack;
 
 namespace CssOptimizer.App
 {
@@ -15,23 +16,36 @@ namespace CssOptimizer.App
 	{
 		private readonly CssStylesheets _cssStylesheets;
 
-		public Processor(CssStylesheets cssStylesheets)
+		public Processor()
 		{
-			_cssStylesheets = cssStylesheets;
+			_cssStylesheets = new CssStylesheets();
 		}
 
 		public async Task AnalyzeWebPages(Options options)
 		{
 			Cleanup(options);
 
+			
 			var tasks = options.Urls
 				.Select(UrlHelper.CreateInvariantToScheme)
 				.Select(uri => Task.Run(async () =>
 				{
 
 					var analyzer = new PageAnalyzer(_cssStylesheets);
+					HtmlDocument htmlDocument = null;
+					try
+					{
+						htmlDocument = await GetHtml(uri);
+					}
+					catch (UnsupportedContentTypeException ex)
+					{
+						return;
+					}
+					
 
-					var analysisResult = await analyzer.Analyze(uri);
+
+
+					var analysisResult = await analyzer.Analyze(uri, htmlDocument);
 
 					WriteResults(analysisResult, options);
 
@@ -51,17 +65,29 @@ namespace CssOptimizer.App
 			analyzedPages.TryAdd(pageUrl.ToString(), pageUrl);
 			
 			await GetValue(pageUrl, analyzedPages, options);
+
 		}
 
 		private async Task GetValue(Uri pageUrl, ConcurrentDictionary<string, Uri> analyzedPages, Options options)
 		{
-			var analysisResult = await GetPageAnalysis(pageUrl);
+
+			PageAnalysisResult analysisResult;
+
+			try
+			{
+				analysisResult = await GetPageAnalysis(pageUrl);
+			}
+			catch (UnsupportedSelectorException ex)
+			{
+				return;
+			}
+			
 
 			WriteResults(analysisResult, options);
 
 			foreach (var internalLink in analysisResult.InternalLinks)
 			{
-				if (analyzedPages.Count < options.MaximumPages)
+				if (analyzedPages.Count < options.MaximumPages || options.MaximumPages == 0)
 				{
 					if (analyzedPages.TryAdd(internalLink.ToString(), internalLink))
 					{
@@ -75,7 +101,8 @@ namespace CssOptimizer.App
 		{
 			var analyzer = new PageAnalyzer(_cssStylesheets);
 
-			var analysisResult = await analyzer.Analyze(pageUrl);
+			var htmlDocument = await GetHtml(pageUrl);
+			var analysisResult = await analyzer.Analyze(pageUrl, htmlDocument);
 			return analysisResult;
 		}
 
@@ -89,7 +116,7 @@ namespace CssOptimizer.App
 
 		private void WriteResults(PageAnalysisResult pageAnalysisResult, Options options)
 		{
-			var formattedResults = FormatResults(pageAnalysisResult);
+			var formattedResults = FormatResults(pageAnalysisResult, options);
 
 			Console.Write(formattedResults);
 
@@ -97,7 +124,7 @@ namespace CssOptimizer.App
 				File.AppendAllText(options.GetOutputFileName(), formattedResults);
 		}
 
-		private string FormatResults(PageAnalysisResult pageAnalysisResult)
+		private string FormatResults(PageAnalysisResult pageAnalysisResult, Options options)
 		{
 			var sb = new StringBuilder();
 
@@ -107,13 +134,25 @@ namespace CssOptimizer.App
 				sb.AppendFormat("{0} ---> {1}\r\n", pageAnalysisResult.Url, cssUsageInfo.Url);
 				sb.AppendLine("=====================");
 
-				foreach (var selector in cssUsageInfo.UnusedSelectors)
-				{
-					sb.AppendLine(selector.ToString());
-				}
+
+				if(!options.Quite)
+					cssUsageInfo.UnusedSelectors.ToList().ForEach((selector => sb.AppendLine(selector.ToString())));
+
+				
 			}
 
 			return sb.ToString();
+		}
+
+		private async Task<HtmlDocument> GetHtml(Uri url)
+		{
+			var html = await WebClientHelper.DownloadStringAsyncStrict(url);
+
+			var htmlDocument = new HtmlDocument();
+
+			htmlDocument.LoadHtml(html);
+
+			return htmlDocument;
 		}
 	}
 }

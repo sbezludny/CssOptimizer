@@ -20,7 +20,7 @@ namespace CssOptimizer.Domain
 			if (_stylesheets.TryGetValue(url, out stylesheet)) 
 				return stylesheet;
 
-			string css = await WebClientHelper.DownloadStringAsync(url);
+			var css = await WebClientHelper.DownloadStringAsync(url);
 
 			stylesheet = new CssStylesheet(url, css);
 			

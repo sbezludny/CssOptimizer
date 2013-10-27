@@ -21,6 +21,9 @@ namespace CssOptimizer.App
 		[Option('c', Required = false, HelpText = "Ограничение количества страниц при анализе сайта.")]
 		public int MaximumPages { get; set; }
 
+		[Option('q', Required = false, HelpText = ".")]
+		public bool Quite { get; set; }
+
 		[Option('o', Required = false, HelpText = "Путь к файлу с результатами.")]
 		public string OutputFile { get; set; }
 

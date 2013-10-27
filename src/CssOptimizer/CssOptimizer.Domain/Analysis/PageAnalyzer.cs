@@ -10,17 +10,17 @@ namespace CssOptimizer.Domain.Analysis
 	public class PageAnalyzer
 	{
 		private readonly CssStylesheets _stylesheets;
-
+		
 		public PageAnalyzer(CssStylesheets stylesheets)
 		{
 			_stylesheets = stylesheets;
 		}
 
-		public async Task<PageAnalysisResult> Analyze(Uri pageUrl)
+		public async Task<PageAnalysisResult> Analyze(Uri pageUrl, HtmlDocument html)
 		{
 			var cssInfos = new List<CssUsageInfo>();
 
-			var html = ParseHtml(await WebClientHelper.DownloadStringAsync(pageUrl));
+			
 
 			if (!String.IsNullOrWhiteSpace(html.GetInlineStyles()))
 			{
@@ -44,6 +44,8 @@ namespace CssOptimizer.Domain.Analysis
 				.Select(href => UrlHelper.CreateFromHref(pageUrl, href))
 				.ToList();
 
+
+
 			var tasks = cssUrls.Select(cssUrl => Task.Run(async () =>
 			{
 				var stylesheet = await _stylesheets.GetOrDownload(cssUrl);
@@ -65,13 +67,7 @@ namespace CssOptimizer.Domain.Analysis
 			return AnalyzeCssStylesheet(styleSheet, html);
 		}
 
-		private static HtmlDocument ParseHtml(string htmlSource)
-		{
-			var html = new HtmlDocument();
-			html.LoadHtml(htmlSource);
-
-			return html;
-		}
+		
 
 		private static CssUsageInfo AnalyzeCssStylesheet(CssStylesheet stylesheet, HtmlDocument html)
 		{

@@ -52,7 +52,17 @@ namespace CssOptimizer.Domain
 
 		public static bool IsSelectorInUse(this HtmlDocument html, CssSelector selector)
 		{
-			return html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
+			bool isSelectorInUse =true;
+			try
+			{
+				isSelectorInUse = html.DocumentNode.SelectNodes(selector.ToXPath()) != null;
+			}
+			catch (Exception)
+			{
+				
+			}
+			
+			return isSelectorInUse;
 		}
 	}
 }
