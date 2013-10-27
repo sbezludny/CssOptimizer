@@ -23,17 +23,10 @@ namespace CssOptimizer.Domain
 
 			var result = new ConcurrentDictionary<Uri, IEnumerable<CssSelector>>();
 
-			HtmlDocument html;
+			var htmlSource = await WebClientHelper.DownloadStringAsync(pageUrl);
 			
-			try
-			{
-				html = await GetHtmlDocumentAsync(pageUrl);
-			}
-			catch (Exception ex)
-			{
-				throw new ArgumentException(String.Format("Произошла ошибка при запросe страницы с адресом `{0}`.", pageUrl), ex);
-			}
-			
+			var html = ParseHtml(htmlSource);
+
 
 			var cssUrls = html.GetExternalCssLinks()
 				.Select(href => UrlHelper.CreateFromHref(pageUrl, href)).ToList();
@@ -70,6 +63,14 @@ namespace CssOptimizer.Domain
 
 		}
 
+		private static HtmlDocument ParseHtml(string htmlSource)
+		{
+			var html = new HtmlDocument();
+			html.LoadHtml(htmlSource);
+
+			return html;
+		}
+
 		private static void AnalyzeCssStylesheet(CssStylesheet stylesheet, HtmlDocument html, ConcurrentDictionary<Uri, IEnumerable<CssSelector>> result)
 		{
 			var unusedSelectors = stylesheet.Selectors
@@ -83,30 +84,7 @@ namespace CssOptimizer.Domain
 			}
 		}
 
-
-		private async Task<HtmlDocument> GetHtmlDocumentAsync(Uri uri)
-		{
-			var htmlDocument = new HtmlDocument();
-
-			string html;
-			using (var webClient = new WebClient())
-			{
-				webClient.Proxy = null;
-
-				html = await webClient.DownloadStringTaskAsync(uri);
-			}
-			htmlDocument.LoadHtml(html);
-			return htmlDocument;
-		}
-
 		
 
-	}
-
-	public class CssStylesheetUsageResult
-	{
-		public Uri Url { get; set; }
-
-		public IEnumerable<CssSelector> UnusedCssSelectors { get; set; } 
 	}
 }

@@ -50,6 +50,7 @@
     <Compile Include="UnsupportedSelectorException.cs" />
     <Compile Include="Utils\Ensure.cs" />
     <Compile Include="Utils\UrlHelper.cs" />
+    <Compile Include="Utils\WebClientHelper.cs" />
     <Compile Include="WebPageAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

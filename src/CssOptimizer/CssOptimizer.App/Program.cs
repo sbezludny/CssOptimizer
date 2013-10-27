@@ -12,7 +12,7 @@ namespace CssOptimizer.App
 {
 	class Program
 	{
-		private static readonly CssStylesheets CssStylesheets = new CssStylesheets();
+		private static readonly CssStylesheets CssStylesheetRepository = new CssStylesheets();
 
 		static void Main(string[] args)
 		{
@@ -61,19 +61,19 @@ namespace CssOptimizer.App
 					.Select(uri => Task.Run(async () =>
 				{
 
-					var analyzer = new WebPageAnalyzer(CssStylesheets);
+					var analyzer = new WebPageAnalyzer(CssStylesheetRepository);
 
 					var results = await analyzer.GetUnusedCssSelectors(uri);
 
-					var formatedResults = FormatResults(uri, results);
+					var formattedResults = FormatResults(uri, results);
 
 
 
-					Console.Write(formatedResults);
+					Console.Write(formattedResults);
 
 					if (!String.IsNullOrWhiteSpace(options.OutputFile))
 					{
-						File.AppendAllText(options.GetOutputFileName(), formatedResults);
+						File.AppendAllText(options.GetOutputFileName(), formattedResults);
 					}
 
 				})).ToList();

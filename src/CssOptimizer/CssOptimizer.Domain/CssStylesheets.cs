@@ -1,36 +1,30 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
+using CssOptimizer.Domain.Utils;
 
 namespace CssOptimizer.Domain
 {
+	/// <summary>
+	/// Stylesheet repository.
+	/// </summary>
 	public class CssStylesheets
 	{
 		private readonly ConcurrentDictionary<Uri, CssStylesheet> _stylesheets = new ConcurrentDictionary<Uri, CssStylesheet>();
 
-		public async Task<CssStylesheet> GetOrDownload(Uri uri)
+		public async Task<CssStylesheet> GetOrDownload(Uri url)
 		{
 			CssStylesheet stylesheet;
 
-			if (_stylesheets.TryGetValue(uri, out stylesheet)) 
+			if (_stylesheets.TryGetValue(url, out stylesheet)) 
 				return stylesheet;
 
-			string css;
+			string css = await WebClientHelper.DownloadStringAsync(url);
 
-			using (var webClient = new WebClient())
-			{
-				webClient.Proxy = null;
-				css = await webClient.DownloadStringTaskAsync(uri);
-			}
-
-			stylesheet = new CssStylesheet(uri, css);
+			stylesheet = new CssStylesheet(url, css);
 			
-			_stylesheets.TryAdd(uri, stylesheet);
+			_stylesheets.TryAdd(url, stylesheet);
 
 			return stylesheet;
 		}
