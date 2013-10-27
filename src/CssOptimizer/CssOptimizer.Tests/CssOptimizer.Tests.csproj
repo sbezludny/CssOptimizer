@@ -37,15 +37,8 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\packages\ServiceStack.Text.3.9.69\lib\net35\ServiceStack.Text.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -54,10 +47,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CssOptimizer.App\CssOptimizer.App.csproj">
-      <Project>{9b8b1d69-adf6-441e-83e4-21e8d13d5881}</Project>
-      <Name>CssOptimizer.App</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CssOptimizer.Domain\CssOptimizer.Domain.csproj">
       <Project>{682dcd74-1e8e-4dd4-a39b-1c76a58ecbca}</Project>
       <Name>CssOptimizer.Domain</Name>

@@ -2,11 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CssOptimizer.Domain;
 using NUnit.Framework;
-using ServiceStack.Text;
 
 namespace CssOptimizer.Tests
 {
@@ -22,7 +19,7 @@ namespace CssOptimizer.Tests
 			var stylesheet = new CssStylesheet(null, css );
 
 			//Assert
-			Assert.AreEqual(expectedSelectors.ToJson(), stylesheet.Selectors.Select(z => z.RawSelector).ToJson());
+			CollectionAssert.AreEquivalent(expectedSelectors, stylesheet.Selectors.Select(z => z.RawSelector));
 
 		}
 

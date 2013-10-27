@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using CssOptimizer.Domain;
 using HtmlAgilityPack;
 using NUnit.Framework;
-using ServiceStack.Text;
 
 namespace CssOptimizer.Tests
 {
@@ -46,7 +45,7 @@ namespace CssOptimizer.Tests
 			var uriSet = htmlDocument.GetExternalCssUrls();
 
 			//Assert
-			Assert.AreEqual(sources.ToJson(), uriSet.ToJson());
+			CollectionAssert.AreEquivalent(sources, uriSet);
 		}
 
 		[TestCaseSource("InlineCssSource")]
